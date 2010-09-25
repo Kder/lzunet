@@ -24,7 +24,7 @@ def con_auth(ul, bd, rf, tu):
     elif u'过期' in ret:
         print(u'帐号欠费，测试期间可携带校园卡来网络中心办理。 ')
         return 5
-    if u'范围' in ret:
+    elif u'范围' in ret:
         print(u'在线用户超出允许的范围：帐号已在别处登录，如果确认不是自己登录的，可以联系网络中心踢对方下线。')
         return 4
     elif 'Timeout' in ret:
