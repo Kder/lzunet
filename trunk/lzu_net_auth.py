@@ -18,7 +18,7 @@ def con_auth(ul, bd, rf, tu):
     ret = u.read().decode('gb2312')
     if os.getenv('LNA_DEBUG'):
         print(ret)
-    elif u'不可用' in ret:
+    if u'不可用' in ret:
         print(u'服务不可用，请稍后再试')
         return 6
     elif u'过期' in ret:
