@@ -63,7 +63,11 @@ elif len(sys.argv) == 3: #For login
     )
     referer = ('Referer', 'http://1.1.1.1/')
 else:
-    print(u'命令格式错误')
+    print(u'''用法：
+
+    把下载到的压缩包中的“登录.bat”中的“邮箱 密码”替换为你的邮箱和上网认证密码，保存，然后双击即可登录。"下线.bat"不必更改，要下线直接双击就行。 
+
+    Linux用户请svn checkout源代码，同上修改对应的conn.sh即可。 \n''')
     sys.exit(3)
 
 test_url = 'http://www.baidu.com/'
