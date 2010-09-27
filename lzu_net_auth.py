@@ -1,4 +1,36 @@
-#coding:utf-8
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+u'''
+兰大上网认证系统自动登录工具。可以实现一键登录/一键下线，无需打开浏览器，无需再手动输入邮箱和密码。 
+
+用法：
+
+    把下载到的压缩包中的“登录.bat”中的“邮箱 密码”替换为你的邮箱和上网认证密码，保存，然后双击 登录.bat 即可登录。"下线.bat"不必更改，要下线直接双击就行。 
+
+    Linux用户请svn checkout源代码，设置好connect.sh中对应的mail和pass，运行connect.sh即可登录，logout.sh不要修改，直接运行就可以下线。 
+    
+    要直接使用lzu_net_auth，命令格式为：
+        登录：
+            lzu_net_auth 邮箱 密码
+        退出：
+            lzu_net_auth logout
+'''
+
+__author__= 'Kder'
+__copyright__ = 'Copyright 2010 Kder'
+__credits__ = ['Kder']
+
+__version__ = '1.0.1'
+__date__ = '2010-9-27'
+__maintainer__ = "Kder"
+__email__ = '[kderlin (#) gmail dot com]'
+__url__ = 'http://www.kder.info'
+__license__ = 'GNU General Public License v3'
+__status__ = 'Release'
+__projecturl__ = 'http://code.google.com/p/lzunet/'
+
+
 import sys,os
 import urllib,urllib2,cookielib
 
@@ -63,11 +95,7 @@ elif len(sys.argv) == 3: #For login
     )
     referer = ('Referer', 'http://1.1.1.1/')
 else:
-    print(u'''用法：
-
-    把下载到的压缩包中的“登录.bat”中的“邮箱 密码”替换为你的邮箱和上网认证密码，保存，然后双击即可登录。"下线.bat"不必更改，要下线直接双击就行。 
-
-    Linux用户请svn checkout源代码，同上修改对应的conn.sh即可。 \n''')
+    print(__doc__)
     sys.exit(3)
 
 test_url = 'http://www.baidu.com/'
@@ -80,3 +108,5 @@ except:
     print(u'发生错误，请稍后再试 Error occured. Please try again later.')
 #finally:
 #    raw_input('请按回车键退出 Press Return to quit...'.decode('utf-8').encode(fenc))
+
+#vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
