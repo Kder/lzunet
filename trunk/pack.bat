@@ -1,5 +1,5 @@
 @cd /d %~p0
 F:\Python27\python.exe setup.py py2exe && upx dist/lzunet.exe
 move dist\lzunet.exe .
-7z a lzunet-1.0.2-win.7z lzunet.exe 登录.bat 下线.bat
+7z a lzunet-1.1.0-win.7z lzunet.exe 登录.bat 下线.bat
 @pause
