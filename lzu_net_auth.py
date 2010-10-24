@@ -15,20 +15,23 @@ u'''
             lzu_net_auth 邮箱 密码
         退出：
             lzu_net_auth logout
+            
 '''
 
 __author__= 'Kder'
 __copyright__ = 'Copyright 2010 Kder'
 __credits__ = ['Kder']
-
-__version__ = '1.0.1'
-__date__ = '2010-9-27'
 __maintainer__ = "Kder"
 __email__ = '[kderlin (#) gmail dot com]'
 __url__ = 'http://www.kder.info'
 __license__ = 'GNU General Public License v3'
 __status__ = 'Release'
 __projecturl__ = 'http://code.google.com/p/lzunet/'
+
+__version__ = '1.1.0'
+__revision__ = "$Revision$"
+__date__ = '$Date$'
+__author__= '$Author$'
 
 
 import sys,os
