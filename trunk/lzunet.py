@@ -195,7 +195,8 @@ if __name__ == '__main__':
         if con_auth(url, body, referer, test_url) == 0:
             print('Your IP: ' + str(get_ip()))
             print(u'操作完成 OK')
-    except:
+    except Exception as e:
+        print(e)
         print(u'发生错误，请稍后再试 Error occured. Please try again later.')
     #finally:
     #    raw_input('请按回车键退出 Press Return to quit...'.decode('utf-8').encode(fenc))

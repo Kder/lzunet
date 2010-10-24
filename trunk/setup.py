@@ -2,6 +2,7 @@
 
 from distutils.core import setup
 import py2exe
+import lzunet
 
 #class Target:
 #    def __init__(self, **kw):
@@ -18,7 +19,7 @@ import py2exe
 console_dict = {"script": "lzunet.py",
 #"icon_resources": [(0,'bialix.ico')],
 "name": "lzunet",
-"version": "1.0",
+"version": '%s.%s' % (lzunet.__version__, lzunet.__revision__.split(':')[1][:-1].strip()),
 "description": u"一键登录兰大上网认证系统",
 "author": 'Kder <kderlin (at) gmail.com>',
 "copyright": 'Copyright 2010 Kder',
@@ -31,13 +32,15 @@ setup(name = "lzunet",
 #      console=[Target('lzunet.py')],
       console=[console_dict],
       zipfile = None,
-      options = {'py2exe': {'bundle_files': 1,
-                            'optimize': 2,
-                            'compressed': 1,
-                            'excludes' : ['_ssl', '_hashlib', 'doctest', 'pdb', 'unittest', 'difflib',
-                'pyreadline', 'logging', 'email', 'ctypes', 'bz2',
-                'inspect','optparse', 'pickle','unicodedata'],
-                            #'dll_excludes' : ['msvcr71.dll'],
-                            }
+      options = {'py2exe': 
+                 {'bundle_files': 1,
+                  'optimize': 2,
+                  'compressed': 1,
+                  'excludes' : ['_ssl', '_hashlib', 'doctest',
+                  'pdb', 'unittest', 'difflib', 'pyreadline',
+                  'logging', 'email', 'bz2', 'inspect', 'optparse',
+                  'pickle','unicodedata'],
+                    #'dll_excludes' : ['msvcr71.dll'],
+                  }
                 },
 )
