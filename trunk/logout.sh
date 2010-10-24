@@ -1,1 +1,1 @@
-python lzu_net_auth.py logout
+python lzunet.py logout

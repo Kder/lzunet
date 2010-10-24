@@ -1,3 +1,3 @@
 @cd /d %~p0
-@lzunet logout
+@lzunet3 logout
 @pause

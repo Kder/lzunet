@@ -1,3 +1,3 @@
-@cd /d %~p0
-@lzu_net_auth "邮箱" "密码"
+﻿@cd /d %~p0
+@lzunet "邮箱" "密码"
 @pause

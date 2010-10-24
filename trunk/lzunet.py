@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-u'''
-兰大上网认证系统自动登录工具。可以实现一键登录/一键下线，无需打开浏览器，无需再手动输入邮箱和密码。 
+u'''兰大上网认证系统自动登录工具。可以实现一键登录/一键下线，无需打开浏览器，无需再手动输入邮箱和密码。 
 
 用法：
 
@@ -34,8 +33,12 @@ __date__ = '$Date$'
 __author__= '$Author$'
 
 
-import sys,os
-import urllib,urllib2,cookielib
+import os
+import sys
+import urllib
+import urllib2
+import cookielib
+
 
 def con_auth(ul, bd, rf, tu):
     cj = cookielib.CookieJar()
@@ -164,12 +167,14 @@ def get_ip():
 
 
 if __name__ == '__main__':
-    if len(sys.argv) == 2: #For logout
+    #logout
+    if len(sys.argv) == 2: 
         if sys.argv[1] == 'logout':
             url = 'http://1.1.1.1/userout.magi'
             body = (('imageField', 'logout'),('userout','logout'))
             referer = ('Referer', 'http://1.1.1.1/logout.htm')
-    elif len(sys.argv) == 3: #For login
+    #login
+    elif len(sys.argv) == 3: 
         url = 'http://1.1.1.1/passwd.magi'
         body = (
         ('userid',sys.argv[1]),
