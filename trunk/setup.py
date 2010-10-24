@@ -27,8 +27,6 @@ console_dict = {"script": "lzu_net_auth.py",
 #the dict is from http://osdir.com/ml/python.py2exe/2004-08/msg00065.html
 
 setup(name = "lzu_net_auth",
-      #version = "1.0.1",
-      #description = u"一键登录兰大上网认证系统 One-click login/logout for LZU internet authorization.",
       author= 'Kder <kderlin # gmail.com>',
 #      console=[Target('lzu_net_auth.py')],
       console=[console_dict],
