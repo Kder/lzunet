@@ -31,7 +31,7 @@ __projecturl__ = 'http://code.google.com/p/lzunet/'
 __version__ = '1.1.0'
 __revision__ = "$Revision$"
 __date__ = '$Date$'
-__author__= '$Author: kderlin $'
+__author__= '$Author$'
 
 
 import sys,os
