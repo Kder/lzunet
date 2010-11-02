@@ -90,12 +90,12 @@ q=0.9,*/*;q=0.8'), rf]
         print(u'流量用完，可以在校内的网上转转，等下个月即可恢复。')
     elif 'logout.htm' in ret:
         print(u'登录成功 Login successfully.')
-    elif 'index.htm' in ret:
+    elif 'Logout OK' in ret:
         print(u'已下线 Logout successfully.')
     return 0
 
-#Get the IP address of local machine
-#code from:
+# Get the IP address of local machine
+# code from:
 # http://hi.baidu.com/yangyingchao/blog/item/8d26b544f6059f45500ffe78.html
 
 
@@ -108,8 +108,7 @@ def get_ip_address(ifname):
     return socket.inet_ntoa(fcntl.ioctl(
         s.fileno(),
         0x8915,  # SIOCGIFADDR
-        struct.pack('256s', ifname[:15])
-    )[20:24])
+        struct.pack('256s', ifname[:15]))[20:24])
 
 #get_ip_address('lo')
 #get_ip_address('eth0')
