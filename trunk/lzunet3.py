@@ -92,7 +92,7 @@ application/xml;q=0.9,*/*;q=0.8'), rf]
         print('流量用完，可以在校内的网上转转，等下个月即可恢复。')
     elif 'logout.htm' in ret:
         print('登录成功 Login successfully.')
-    elif 'index.htm' in ret:
+    elif 'Logout OK' in ret:
         print('已下线 Logout successfully.')
     return 0
 
