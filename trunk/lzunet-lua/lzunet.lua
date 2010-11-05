@@ -51,10 +51,10 @@ function con_auth(ul, bd, rf, tu)
             end
 --~         except:
 --~             print('验证超时(不影响正常上网，请打开浏览器刷新页面即可) Timeout')
---~         return 2
+--~         return 3
     elseif string.find(ret, 'Password error') then
         print('用户名或密码错误 Username or Password error')
-        return 1
+        return 2
     elseif string.find(ret, '限制') then
         print('流量用完，可以在校内的网上转转，等下个月即可恢复。')
     elseif string.find(ret, 'logout.htm') then
@@ -63,6 +63,7 @@ function con_auth(ul, bd, rf, tu)
         print('已下线 Logout successfully.')
     else
         print(ret)
+        return 1
     end
     return 0
 end
@@ -93,6 +94,8 @@ test_url = 'http://www.baidu.com/'
 --~ #fenc = sys.getfilesystemencoding()
 if con_auth(url, body, referer, test_url) == 0 then
     print('操作完成 OK')
+else
+    print('发生错误，请稍后再试 Error occured. Please try again later.')
 end
 --~ try:
 --~     if con_auth(url, body, referer, test_url) == 0:
@@ -100,6 +103,6 @@ end
 --~         print(u'操作完成 OK')
 --~ except Exception as e:
 --~     print(e)
---~     print(u'发生错误，请稍后再试 Error occured. Please try again later.')
+
 
 --~ $Id$
