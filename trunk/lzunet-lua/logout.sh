@@ -1,0 +1,1 @@
+lua lzunet.lua logout

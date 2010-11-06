@@ -1,4 +1,4 @@
-﻿--~ lzunet.lua
+--~ lzunet.lua
 --~ lzunet lua version for *nix utf-8 environment
 --~ by Kder
 --~ license: GPLv3
@@ -51,8 +51,8 @@ function con_auth(ul, bd, rf, tu)
         return 4
     elseif string.find(ret, 'Timeout') then
         f = http.request(tu)
-
-        if string.find(f, '百度') then
+        print(f)
+        if string.find(f, 'Baidu') then
             print('已连接 Connected')
 --~         print('验证超时(不影响正常上网，请打开浏览器刷新页面即可) Timeout')
             return 0
