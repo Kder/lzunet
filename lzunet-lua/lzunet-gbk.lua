@@ -52,7 +52,7 @@ function con_auth(ul, bd, rf, tu)
     elseif string.find(ret, 'Timeout') then
         f = http.request(tu)
 
-        if string.find(f, '百度') then
+        if string.find(f, 'Baidu') then
             print('已连接 Connected')
 --~                       print('验证超时(不影响正常上网，请打开浏览器刷新页面即可) Timeout')
             return 0
