@@ -1,6 +1,6 @@
--- coding=utf-8 --
---~ lzunet.lua
---~ lzunet lua version for *nix utf-8 environment
+-- coding=gbk --
+--~ lzunet_gbk.lua
+--~ lzunet lua version for gbk environment
 --~ by Kder
 --~ license: GPLv3
 
@@ -8,9 +8,10 @@ require "socket"
 http = require("socket.http")
 
 
-option1 = '>.?[%d.]+&nbsp;ï¼ˆM'
-option2 = '>[%d.]+&nbsp;ï¼ˆH'
+option1 = '>.?[%d.]+&nbsp;£¨M'
+option2 = '>[%d.]+&nbsp;£¨H'
 option3 = '<font color=red>%S+'
+
 
 --~ code from http://lua-users.org/wiki/SplitJoin
 function string:split(sSeparator, nMax, bRegexp)
@@ -84,7 +85,7 @@ function ocr(data)
 end
 
 function verify(userid, passwd, headers)
-    --ocrè¯†åˆ«éªŒè¯ç å¹¶ç™»å½•è®¤è¯ç³»ç»Ÿ
+    --ocrÊ¶±ğÑéÖ¤Âë²¢µÇÂ¼ÈÏÖ¤ÏµÍ³
 
     response_body = {}
     http.request{
@@ -146,7 +147,7 @@ function checkflow(userid, passwd)
 
 			if res == nil then
 				break
-			elseif res == 'éªŒè¯ç é”™è¯¯ï¼Œè¯·é‡æ–°æäº¤ã€‚' then
+			elseif res == 'ÑéÖ¤Âë´íÎó£¬ÇëÖØĞÂÌá½»¡£' then
 				sleep(0.2)
 				continue = true;break
 			else
@@ -206,7 +207,7 @@ function con_auth(ul, bd, rf, tu)
     ret = table.concat(response_body)
 
 	if ret == '' then
-		print('è¯·æ£€æŸ¥ç½‘ç»œæ˜¯å¦è¿æ¥æ­£å¸¸\n')
+		print('Çë¼ì²éÍøÂçÊÇ·ñÁ¬½ÓÕı³£\n')
 		return 1
 	end
 
@@ -215,35 +216,35 @@ function con_auth(ul, bd, rf, tu)
     end
 
 --~     print(ul,bd,res)
-    if string.find(ret, 'ä¸å¯ç”¨') then
-        print('æœåŠ¡ä¸å¯ç”¨ï¼Œè¯·ç¨åå†è¯•')
+    if string.find(ret, '²»¿ÉÓÃ') then
+        print('·şÎñ²»¿ÉÓÃ£¬ÇëÉÔºóÔÙÊÔ')
         return 6
-    elseif string.find(ret, 'è¿‡æœŸ') then
-        print('å¸å·æ¬ è´¹ï¼Œæµ‹è¯•æœŸé—´å¯æºå¸¦æ ¡å›­å¡æ¥ç½‘ç»œä¸­å¿ƒåŠç†ã€‚ ')
+    elseif string.find(ret, '¹ıÆÚ') then
+        print('ÕÊºÅÇ··Ñ£¬²âÊÔÆÚ¼ä¿ÉĞ¯´øĞ£Ô°¿¨À´ÍøÂçÖĞĞÄ°ìÀí¡£ ')
         return 5
-    elseif string.find(ret, 'èŒƒå›´') then
-        print('åœ¨çº¿ç”¨æˆ·è¶…å‡ºå…è®¸çš„èŒƒå›´ï¼šå¸å·å·²åœ¨åˆ«å¤„ç™»å½•ï¼Œå¦‚æœç¡®è®¤ä¸æ˜¯è‡ªå·±ç™»å½•çš„ï¼Œ\
-å¯ä»¥è”ç³»ç½‘ç»œä¸­å¿ƒè¸¢å¯¹æ–¹ä¸‹çº¿ã€‚')
+    elseif string.find(ret, '·¶Î§') then
+        print('ÔÚÏßÓÃ»§³¬³öÔÊĞíµÄ·¶Î§£ºÕÊºÅÒÑÔÚ±ğ´¦µÇÂ¼£¬Èç¹ûÈ·ÈÏ²»ÊÇ×Ô¼ºµÇÂ¼µÄ£¬\
+¿ÉÒÔÁªÏµÍøÂçÖĞĞÄÌß¶Ô·½ÏÂÏß¡£')
         return 4
     elseif string.find(ret, 'Timeout') then
         f = http.request(tu)
 --~         print(f)
         if string.find(f, 'Baid') then
-            print('å·²è¿æ¥ Connected')
---~         print('éªŒè¯è¶…æ—¶(ä¸å½±å“æ­£å¸¸ä¸Šç½‘ï¼Œè¯·æ‰“å¼€æµè§ˆå™¨åˆ·æ–°é¡µé¢å³å¯) Timeout')
+            print('ÒÑÁ¬½Ó Connected')
+--~         print('ÑéÖ¤³¬Ê±(²»Ó°ÏìÕı³£ÉÏÍø£¬Çë´ò¿ªä¯ÀÀÆ÷Ë¢ĞÂÒ³Ãæ¼´¿É) Timeout')
             return 0
         end
 
     elseif string.find(ret, 'Password error') then
-        print('ç”¨æˆ·åæˆ–å¯†ç é”™è¯¯ Username or Password error')
+        print('ÓÃ»§Ãû»òÃÜÂë´íÎó Username or Password error')
         return 2
-    elseif string.find(ret, 'é™åˆ¶') then
-        print('æµé‡ç”¨å®Œï¼Œå¯ä»¥åœ¨æ ¡å†…çš„ç½‘ä¸Šè½¬è½¬ï¼Œç­‰ä¸‹ä¸ªæœˆå³å¯æ¢å¤ã€‚')
+    elseif string.find(ret, 'ÏŞÖÆ') then
+        print('Á÷Á¿ÓÃÍê£¬¿ÉÒÔÔÚĞ£ÄÚµÄÍøÉÏ×ª×ª£¬µÈÏÂ¸öÔÂ¼´¿É»Ö¸´¡£')
 		return 7
     elseif string.find(ret, 'logout.htm') then
-        print('ç™»å½•æˆåŠŸ Login successfully.')
+        print('µÇÂ¼³É¹¦ Login successfully.')
     elseif string.find(ret, 'Logout OK') then
-        print('å·²ä¸‹çº¿ Logout successfully.')
+        print('ÒÑÏÂÏß Logout successfully.')
     else
         print(ret)
         return 1
@@ -313,9 +314,9 @@ function main()
 
     test_url = 'http://www.baidu.com/'
     if con_auth(url, body, referer, test_url) == 0 then
-		print('æ“ä½œå®Œæˆ OK')
+		print('²Ù×÷Íê³É OK')
 	else
-		print('å‘ç”Ÿé”™è¯¯ï¼Œè¯·ç¨åå†è¯• Error occured. Please try again later.')
+		print('·¢Éú´íÎó£¬ÇëÉÔºóÔÙÊÔ Error occured. Please try again later.')
 	end
 end
 
