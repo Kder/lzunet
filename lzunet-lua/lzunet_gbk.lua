@@ -5,8 +5,8 @@
 --~ license: GPLv3
 
 require "socket"
-http = require("socket.http")
-
+local http = require("socket.http")
+local ltn12 = require("ltn12")
 
 option1 = '>.?[%d.]+&nbsp;（M'
 option2 = '>[%d.]+&nbsp;（H'
@@ -63,24 +63,32 @@ function ocr(data)
 	end
 
     args = 'tesseract '..img_name..' ocr'
-    proc = io.popen(args)
---~     if retcode!=0
+--~     proc = io.popen(args)
+	if os.getenv("OS") == 'Windows_NT' then
+		require "ex"
+		pid = os.spawn{"tesseract",img_name,'ocr'}
+		retcode = pid:wait(pid)
+	else
+		retcode = os.execute(args)
+	end
+--~     if retcode ~= 0 then
 --~         return 7
+--~ 	end
     local s
-	
-    repeat
-        sleep(0.2)
-    until pcall(
-        function ()
-            local f = io.input('ocr.txt')
-            s = f:read()--.strip()
-            f:close()
-            os.remove(img_name)
-            os.remove('ocr.txt')
-            return true
-        end
-    )
-    
+	s = io.input('ocr.txt'):read()
+--~     repeat
+--~         sleep(0.5)
+--~     until pcall(
+--~         function ()
+--~ 			sleep(0.5)
+--~             local f = io.input('ocr.txt')
+--~             s = f:read()--.strip()
+--~             f:close()
+--~             return true
+--~         end
+--~     )
+	os.remove(img_name)
+	os.remove('ocr.txt')
     return s
 end
 
@@ -138,26 +146,31 @@ function checkflow(userid, passwd)
     }
 
     headers["Cookie"] = h["set-cookie"]
---~ 	verify(userid, passwd, headers)
 
-    for i = 1, 5 do
-        local continue
-		repeat
-			res = verify(userid, passwd, headers)
-
-			if res == nil then
-				break
-			elseif res == '验证码错误，请重新提交。' then
-				sleep(0.2)
-				continue = true;break
-			else
-				return res
-            end
-
-            continue = true
-        until true
-        if not continue then break end
+	res = verify(userid, passwd, headers)
+	if res == '验证码错误，请重新提交。' then
+		sleep(0.6)
+		verify(userid, passwd, headers)
 	end
+
+--~     for i = 1, 5 do
+--~         local continue
+--~ 		repeat
+--~ 			res = verify(userid, passwd, headers)
+
+--~ 			if res == nil then
+--~ 				break
+--~ 			elseif res == '验证码错误，请重新提交。' then
+--~ 				sleep(0.6)
+--~ 				continue = true;break
+--~ 			else
+--~ 				return res
+--~             end
+
+--~             continue = true
+--~         until true
+--~         if not continue then break end
+--~ 	end
 
     headers["Content-Length"] = nil
     http.request{
@@ -286,8 +299,10 @@ function getLocalIP()
 
 end
 
+ip = getLocalIP()
+test_url = 'http://www.baidu.com/'
+
 function main()
-    local ip = getLocalIP()
 	print('Your IP: '..ip)
 
     --~ logout
@@ -312,7 +327,6 @@ function main()
     --~     os.exit(3)
     end
 
-    test_url = 'http://www.baidu.com/'
     if con_auth(url, body, referer, test_url) == 0 then
 		print('操作完成 OK')
 	else
