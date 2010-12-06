@@ -1,6 +1,6 @@
 -- coding=utf-8 --
---~ lzunet.lua
---~ lzunet lua version for *nix utf-8 environment
+--~ lzunet.lua v1.2
+--~ 兰大上网认证系统自动登录工具
 --~ by Kder
 --~ license: GPLv3
 
@@ -189,7 +189,7 @@ function verify(userid, passwd, headers)
     err_found = string.match(ret, option3)
     if err_found ~= nil then
         err = string.split(err_found,">",1)
-        print(err[2])
+--~         print(err[2])
         return err[2]
     end
 end
@@ -215,8 +215,9 @@ function checkflow(userid, passwd)
     headers["Cookie"] = h["set-cookie"]
 
 	res = verify(userid, passwd, headers)
-	if res == msgs.ERR_CODE then
-		return res
+--~ 	if res == msgs.ERR_CODE then
+	if res ~= nil then
+		return 1,res
 --~ 		os.sleep(0.6)
 --~ 		verify(userid, passwd, headers)
 	end
@@ -257,7 +258,6 @@ function checkflow(userid, passwd)
     local data = table.concat(response_body)
     if data ~= nil then
         data1 = string.match(data, option1)
-			print(data1)
         data2 = string.match(data, option2)
 
         if data1 ~= nil and data2 ~= nil then
@@ -349,7 +349,6 @@ function getLocalIP()
         for index,item in luacomE.pairs (IPConfigSet) do
             if item.IPAddress(index-1) ~= nil then
                 ip = item:IPAddress(index-1)
-        --~ 		print(ip,#ip)
                 return ip
             end
         end
