@@ -33,10 +33,12 @@ end
 function check()
     MB,HOUR = checkflow(userid,passwd)
 	print(MB,HOUR)
-	if string.find(MB, msgs.ERR_CODE) then
+--~ 	if string.find(MB, msgs.ERR_CODE) then
+	if HOUR == msgs.ERR_CODE then
 		iup.Message("Error", msgs.ERR)
-	end
-	if HOUR ~= nil then
+	elseif MB == 1 then
+		iup.Message("Error", HOUR)
+	elseif HOUR ~= nil then
 		iup.Message(msgs.TITLE_FLOW,string.format(msgs.MSG_FLOW, MB, HOUR))
 	end
 end
