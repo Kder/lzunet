@@ -5,12 +5,81 @@
 --~ license: GPLv3
 
 require "socket"
-http = require("socket.http")
+local http = require("socket.http")
+local ltn12 = require("ltn12")
+local ustr = require("icu.ustring")
+
+msgs = {
+["ERR"] = '发生错误，请稍后再试 Error occured. Please try again later.',
+["ERR_CODE"] = '验证码错误，请重新提交。',
+["ERR_CONF"] = '无法打开配置文件lzunet.txt或者文件格式错误，请确认文件存在，且格式为 邮箱 密码',
+["ERR_CONNECTION"] = '请检查网络是否连接正常\n',
+["ERR_EXCEEDED"] = '在线用户超出允许的范围：帐号已在别处登录，如果确认不是自己登录的，可以联系网络中心踢对方下线。',
+["ERR_EXPIRED"] = '帐号欠费，测试期间可携带校园卡来网络中心办理。 ',
+["ERR_UNAVAILABLE"] = '服务不可用，请稍后再试',
+["ERR_AUTH"] = '请检查lzunet.txt中的邮箱和密码是否正确(格式为"邮箱 密码"，不含引号)',
+["ERR_OCR"] = '请检查lzunet.txt中的邮箱和密码是否正确；如果设置正确，请稍候再试一次',
+["ERR_FLOW"] = '流量用完，可以在校内的网上转转，等下个月即可恢复。',
+["ERR_TESSERACT"] = 'tesseract错误，请确认tesseract是否正确安装',
+["ERR_DJPEG"] = 'djpeg错误，请确认libjpeg是否正确安装且djpeg命令可用',
+["ERR_IO"] = '文件写入错误，请确认程序所在目录有读写权限',
+["MSG_FLOW"] = '您本月已经使用的流量为 %s MB\n您本月已经上网 %s 小时',
+["MSG_OK"] = '操作完成 OK',
+["MSG_ABOUT"] = "兰大上网认证系统自动登录工具 \nlzunet 1.2\n作者： Kder\n项目主页： http://code.google.com/p/lzunet/ \nLicense : GPLv3",
+["MSG_LOGIN"] = "登录成功^_^ \nLogin Successfully",
+["MSG_CONNECTED"] = '已连接 Connected',
+["MSG_LOGOUT"] = '您已经成功退出:-)\nLogout Successfully',
+["FND_UNAVAILABLE"] = '不可用',
+["FND_EXPIRED"] = '过期',
+["FND_EXCEEDED"] = '范围',
+["FND_FLOW"] = '限制',
+["TITLE_FILE"] = '文件',
+["TITLE_HELP"] = '帮助',
+["TITLE_LOGIN"] = '登录外网',
+["TITLE_LOGOUT"] = "退出外网",
+["TITLE_EXIT"] = "退出程序",
+["TITLE_ABOUT"] = '关于',
+["TITLE_IP"] = "本机IP",
+["TITLE_USAGE"] = '用法',
+["TITLE_ERR"] = '错误',
+["TITLE_FLOW"] = '流量查询',
+["USAGE"] = [[
+lzunet - 兰大上网认证系统自动登录工具。
+
+主要功能
+
+    一键登录/退出、流量查询（支持验证码识别）
+
+使用方法
+
+    解压后，修改lzunet.txt，把自己的用户名和密码填入。
+	运行 start.bat(Windows下) 或 lzunet.wlua(linux下) 就会出来主界面。
+
+	]],
+}
 
 
-option1 = '>.?[%d.]+&nbsp;（M'
-option2 = '>[%d.]+&nbsp;（H'
+option1 = '>.?[%d.]+&nbsp;.?.?M'
+option2 = '>[%d.]+&nbsp;.?.?H'
 option3 = '<font color=red>%S+'
+
+ISWIN = false
+if os.getenv("OS")=='Windows_NT' then
+	ISWIN = true
+end
+
+function togbk(str)
+	return ustr.encode(ustr(str),"gbk")
+end
+
+
+
+if ISWIN then
+	for k,v in pairs(msgs) do
+		msgs[k] = ustr.encode(ustr(v),"gbk")
+	end
+end
+
 
 --~ code from http://lua-users.org/wiki/SplitJoin
 function string:split(sSeparator, nMax, bRegexp)
@@ -55,37 +124,44 @@ function ocr(data)
     img_file:close()
 
 --~         return 5
-    if os.getenv("OS") ~= 'Windows_NT' then
+    if not ISWIN then
         io.popen('djpeg -bmp code.jpg > code.bmp')
         img_name = 'code.bmp'
 --~             return 6
 	end
 
     args = 'tesseract '..img_name..' ocr'
-    proc = io.popen(args)
---~     if retcode!=0
+--~     proc = io.popen(args)
+	if ISWIN then
+		require "ex"
+		pid = os.spawn{"tesseract",img_name,'ocr'}
+		retcode = pid:wait(pid)
+	else
+		retcode = os.execute(args)
+	end
+--~     if retcode ~= 0 then
 --~         return 7
+--~ 	end
     local s
-	
-    repeat
-        sleep(0.2)
-    until pcall(
-        function ()
-            local f = io.input('ocr.txt')
-            s = f:read()--.strip()
-            f:close()
-            os.remove(img_name)
-            os.remove('ocr.txt')
-            return true
-        end
-    )
-    
+	s = io.input('ocr.txt'):read()
+--~     repeat
+--~         sleep(0.5)
+--~     until pcall(
+--~         function ()
+--~ 			sleep(0.5)
+--~             local f = io.input('ocr.txt')
+--~             s = f:read()--.strip()
+--~             f:close()
+--~             return true
+--~         end
+--~     )
+	os.remove(img_name)
+	os.remove('ocr.txt')
     return s
 end
 
 function verify(userid, passwd, headers)
     --ocr识别验证码并登录认证系统
-
     response_body = {}
     http.request{
         url = "http://a.lzu.edu.cn/servlet/AuthenCodeImage",
@@ -137,26 +213,32 @@ function checkflow(userid, passwd)
     }
 
     headers["Cookie"] = h["set-cookie"]
---~ 	verify(userid, passwd, headers)
 
-    for i = 1, 5 do
-        local continue
-		repeat
-			res = verify(userid, passwd, headers)
-
-			if res == nil then
-				break
-			elseif res == '验证码错误，请重新提交。' then
-				sleep(0.2)
-				continue = true;break
-			else
-				return res
-            end
-
-            continue = true
-        until true
-        if not continue then break end
+	res = verify(userid, passwd, headers)
+	if res == msgs.ERR_CODE then
+		return res
+--~ 		os.sleep(0.6)
+--~ 		verify(userid, passwd, headers)
 	end
+
+--~     for i = 1, 5 do
+--~         local continue
+--~ 		repeat
+--~ 			res = verify(userid, passwd, headers)
+
+--~ 			if res == nil then
+--~ 				break
+--~ 			elseif res == '验证码错误，请重新提交。' then
+--~ 				sleep(0.6)
+--~ 				continue = true;break
+--~ 			else
+--~ 				return res
+--~             end
+
+--~             continue = true
+--~         until true
+--~         if not continue then break end
+--~ 	end
 
     headers["Content-Length"] = nil
     http.request{
@@ -175,7 +257,9 @@ function checkflow(userid, passwd)
     local data = table.concat(response_body)
     if data ~= nil then
         data1 = string.match(data, option1)
+			print(data1)
         data2 = string.match(data, option2)
+
         if data1 ~= nil and data2 ~= nil then
             mb = string.match(data1, "[%d.]+")
             hour = string.match(data2, "[%d.]+")
@@ -206,8 +290,8 @@ function con_auth(ul, bd, rf, tu)
     ret = table.concat(response_body)
 
 	if ret == '' then
-		print('请检查网络是否连接正常\n')
-		return 1
+		print(msgs.ERR_CONNECTION)
+		return 1, msgs.ERR_CONNECTION
 	end
 
     if os.getenv('LNA_DEBUG') then
@@ -215,35 +299,34 @@ function con_auth(ul, bd, rf, tu)
     end
 
 --~     print(ul,bd,res)
-    if string.find(ret, '不可用') then
-        print('服务不可用，请稍后再试')
-        return 6
-    elseif string.find(ret, '过期') then
-        print('帐号欠费，测试期间可携带校园卡来网络中心办理。 ')
-        return 5
-    elseif string.find(ret, '范围') then
-        print('在线用户超出允许的范围：帐号已在别处登录，如果确认不是自己登录的，\
-可以联系网络中心踢对方下线。')
-        return 4
+    if string.find(ret, msgs.FND_UNAVAILABLE) then
+        print(msgs.ERR_UNAVAILABLE)
+        return 6, msgs.ERR_UNAVAILABLE
+    elseif string.find(ret, msgs.FND_EXPIRED) then
+        print(msgs.ERR_EXPIRED)
+        return 5, msgs.ERR_EXPIRED
+    elseif string.find(ret, msgs.FND_EXCEEDED) then
+        print(msgs.ERR_EXCEEDED)
+        return 4, msgs.ERR_EXCEEDED
     elseif string.find(ret, 'Timeout') then
         f = http.request(tu)
 --~         print(f)
         if string.find(f, 'Baid') then
-            print('已连接 Connected')
+            print(msgs.MSG_CONNECTED)
 --~         print('验证超时(不影响正常上网，请打开浏览器刷新页面即可) Timeout')
             return 0
         end
 
     elseif string.find(ret, 'Password error') then
-        print('用户名或密码错误 Username or Password error')
-        return 2
-    elseif string.find(ret, '限制') then
-        print('流量用完，可以在校内的网上转转，等下个月即可恢复。')
-		return 7
+        print(msgs.ERR_AUTH)
+        return 2, msgs.ERR_AUTH
+    elseif string.find(ret, msgs.FND_FLOW) then
+        print(msgs.ERR_FLOW)
+		return 7, msgs.ERR_FLOW
     elseif string.find(ret, 'logout.htm') then
-        print('登录成功 Login successfully.')
+        print(msgs.MSG_LOGIN)
     elseif string.find(ret, 'Logout OK') then
-        print('已下线 Logout successfully.')
+        print(msgs.MSG_LOGOUT)
     else
         print(ret)
         return 1
@@ -254,7 +337,7 @@ end
 
 
 function getLocalIP()
-    if os.getenv("OS")=='Windows_NT' then
+    if ISWIN then
         require('luacom')
         computer = "."
         oWMIService = luacom.GetObject ("winmgmts:{impersonationLevel=Impersonate}!\\\\" ..computer.. "\\root\\cimv2")
@@ -285,8 +368,10 @@ function getLocalIP()
 
 end
 
+ip = getLocalIP()
+test_url = 'http://www.baidu.com/'
+
 function main()
-    local ip = getLocalIP()
 	print('Your IP: '..ip)
 
     --~ logout
@@ -311,11 +396,10 @@ function main()
     --~     os.exit(3)
     end
 
-    test_url = 'http://www.baidu.com/'
     if con_auth(url, body, referer, test_url) == 0 then
-		print('操作完成 OK')
+		print(msgs.MSG_OK)
 	else
-		print('发生错误，请稍后再试 Error occured. Please try again later.')
+		print(msgs.ERR)
 	end
 end
 
