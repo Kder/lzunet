@@ -4,6 +4,7 @@
 --~ by Kder [http://www.kder.info]
 --~ license: GPLv3
 
+require 'ex'
 require 'socket'
 local http = require('socket.http')
 local ltn12 = require('ltn12')
@@ -132,19 +133,20 @@ function ocr(data)
         img_name = 'code.bmp'
 --~             return 6
 	end
+	os.setenv('TESSDATA_PREFIX', './')
+    args = 'tesseract.exe '..img_name..' ocr nobatch digits'
 
-    args = 'tesseract '..img_name..' ocr'
 --~     proc = io.popen(args)
 	if ISWIN then
 		require('luacom')
 		wsh = luacom.CreateObject('WScript.Shell')
 		ret = wsh:Run(args,0,true)
-
+--~ 		print(ret)
 --~ 	repeat
 --~ 		os.sleep(0.1)
 --~ 	until ret.Status ~= 0
 
---~ 		require 'ex'
+--~
 --~ 		pid = os.spawn{'tesseract',img_name,'ocr'}
 --~ 		retcode = pid:wait(pid)
 	else
