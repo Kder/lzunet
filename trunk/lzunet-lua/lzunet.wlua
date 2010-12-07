@@ -11,7 +11,7 @@ require( 'iuplua' )
 
 f = io.open('lzunet.txt','r')
 s = f:read()
---~ 	print(type(s))
+--~     print(type(s))
 userpass = string.split(s,' ',1)
 userid,passwd = userpass[1],userpass[2]
 
@@ -22,62 +22,62 @@ function login()
     url = 'http://1.1.1.1/passwd.magi'
     body = 'userid='..userid..'&passwd='..passwd..'&serivce=internet&chap=0&random=internet'
     referer = 'http://1.1.1.1/'
-	retcode, msg = con_auth(url, body, referer, test_url)
-	if retcode == 0 then
-		if msg ~= nil then
-			iup.Message(msgs.MSG_OK, msgs.MSG_LOGIN..'\n'..msg)
-		else
-			iup.Message(msgs.MSG_OK, msgs.MSG_LOGIN)
-		end
+    retcode, msg = con_auth(url, body, referer, test_url)
+    if retcode == 0 then
+        if msg ~= nil then
+            iup.Message(msgs.MSG_OK, msgs.MSG_LOGIN..'\n'..msg)
+        else
+            iup.Message(msgs.MSG_OK, msgs.MSG_LOGIN)
+        end
     else
-		iup.Message('Error', msg)
-	end
+        iup.Message('Error', msg)
+    end
 end
 
 function check()
     MB,HOUR = checkflow(userid,passwd)
-	print(MB,HOUR)
---~ 	if string.find(MB, msgs.ERR_CODE) then
-	if HOUR == msgs.ERR_CODE then
-		iup.Message('Error', msgs.ERR)
-	elseif MB == 1 then
-		iup.Message('Error', HOUR)
-	elseif HOUR ~= nil then
-		iup.Message(msgs.TITLE_FLOW,string.format(msgs.MSG_FLOW, MB, HOUR))
-	end
+    print(MB,HOUR)
+--~     if string.find(MB, msgs.ERR_CODE) then
+    if HOUR == msgs.ERR_CODE then
+        iup.Message('Error', msgs.ERR)
+    elseif MB == 1 then
+        iup.Message('Error', HOUR)
+    elseif HOUR ~= nil then
+        iup.Message(msgs.TITLE_FLOW,string.format(msgs.MSG_FLOW, MB, HOUR))
+    end
 end
 
 function check_ip()
 
-	iup.Message('Your IP',ip)
+    iup.Message('Your IP',ip)
 end
 
 function logout()
-	url = 'http://1.1.1.1/userout.magi'
-	body = 'imageField=logout&userout=logout'
-	referer = 'http://1.1.1.1/logout.htm'
-	retcode, msg = con_auth(url, body, referer, test_url)
-	if retcode == 0 then
-		iup.Message(msgs.MSG_OK, msg)
-	else
-		iup.Message('Error', msgs.ERR)
-	end
+    url = 'http://1.1.1.1/userout.magi'
+    body = 'imageField=logout&userout=logout'
+    referer = 'http://1.1.1.1/logout.htm'
+    retcode, msg = con_auth(url, body, referer, test_url)
+    if retcode == 0 then
+        iup.Message(msgs.MSG_OK, msg)
+    else
+        iup.Message('Error', msgs.ERR)
+    end
 
 end
 
 function quit()
-	dlg:hide()
+    dlg:hide()
 end
 
 function about()
-	iup.Message(msgs.TITLE_ABOUT,msgs.MSG_ABOUT)
-	size='QUARTERxQUARTER'
+    iup.Message(msgs.TITLE_ABOUT,msgs.MSG_ABOUT)
+    size='QUARTERxQUARTER'
 end
 
 function usage()
-	ml = iup.multiline{readonly = 'YES', expand='YES', value=msgs.USAGE, border='NO', wordwrap = 'YES' ,scrollbar = 'NO'}
-	abt_dlg = iup.dialog{ml; title=msgs.TITLE_USAGE, size='280x280'}
-	abt_dlg:show()
+    ml = iup.multiline{readonly = 'YES', expand='YES', value=msgs.USAGE, border='NO', wordwrap = 'YES' ,scrollbar = 'NO'}
+    abt_dlg = iup.dialog{ml; title=msgs.TITLE_USAGE, size='280x280'}
+    abt_dlg:show()
 end
 
 
@@ -107,24 +107,24 @@ button_labels = {msgs.TITLE_LOGIN, msgs.TITLE_FLOW, msgs.TITLE_LOGOUT, msgs.TITL
 buttons = {}
 
 for k,v in pairs(button_labels) do
-	buttons[k] = iup.button{ title = button_labels[k]}
-	buttons[k].action = functions[k]
+    buttons[k] = iup.button{ title = button_labels[k]}
+    buttons[k].action = functions[k]
 end
 
 -- press&release, active, ignore , , EIGHTHxEIGHTH
 
 --~ , resize = 'NO', menubox = 'NO', maxbox = 'NO', minbox = 'NO'
 dlg = iup.dialog{ menu = menu,
-		iup.frame{
-		iup.vbox{iup.fill{},
-			iup.hbox{ iup.fill{}, buttons[1], iup.fill{}, buttons[2], iup.fill{} ;
-				alignment='ACENTER'
-			},iup.fill{},
-			iup.hbox{ iup.fill{}, buttons[3], iup.fill{}, buttons[4], iup.fill{} ;
-				alignment='ACENTER'},iup.fill{},
-			};
-		alignment = 'ACENTER'},title = 'lzunet 1.2',size = '120x80'
-	}
+        iup.frame{
+        iup.vbox{iup.fill{},
+            iup.hbox{ iup.fill{}, buttons[1], iup.fill{}, buttons[2], iup.fill{} ;
+                alignment='ACENTER'
+            },iup.fill{},
+            iup.hbox{ iup.fill{}, buttons[3], iup.fill{}, buttons[4], iup.fill{} ;
+                alignment='ACENTER'},iup.fill{},
+            };
+        alignment = 'ACENTER'},title = 'lzunet 1.2',size = '120x80'
+    }
 
 
 function dlg:k_any(c)

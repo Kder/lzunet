@@ -55,9 +55,9 @@ lzunet - 兰大上网认证系统自动登录工具。
 使用方法
 
     解压后，修改lzunet.txt，把自己的用户名和密码填入。
-	运行 启动.bat(Windows下) 或 lzunet.wlua(linux下) 就会出现主界面。
+    运行 启动.bat(Windows下) 或 lzunet.wlua(linux下) 就会出现主界面。
 
-	]],
+    ]],
 }
 
 --~ option = 'alert("(.-M)");'
@@ -69,46 +69,46 @@ match_err_msg = '<font color=red>%S+'
 
 ISWIN = false
 if os.getenv('OS')=='Windows_NT' then
-	ISWIN = true
+    ISWIN = true
 end
 
 function togbk(str)
-	return ustr.encode(ustr(str),'gbk')
+    return ustr.encode(ustr(str),'gbk')
 end
 
 
 
 if ISWIN then
-	for k,v in pairs(msgs) do
-		msgs[k] = ustr.encode(ustr(v),'gbk')
-	end
+    for k,v in pairs(msgs) do
+        msgs[k] = ustr.encode(ustr(v),'gbk')
+    end
 end
 
 
 --~ code from http://lua-users.org/wiki/SplitJoin
 function string:split(sSeparator, nMax, bRegexp)
-	assert(sSeparator ~= '')
-	assert(nMax == nil or nMax >= 1)
+    assert(sSeparator ~= '')
+    assert(nMax == nil or nMax >= 1)
 
-	local aRecord = {}
+    local aRecord = {}
 
-	if self:len() > 0 then
-		local bPlain = not bRegexp
-		nMax = nMax or -1
+    if self:len() > 0 then
+        local bPlain = not bRegexp
+        nMax = nMax or -1
 
-		local nField=1 nStart=1
-		local nFirst,nLast = self:find(sSeparator, nStart, bPlain)
-		while nFirst and nMax ~= 0 do
-			aRecord[nField] = self:sub(nStart, nFirst-1)
-			nField = nField+1
-			nStart = nLast+1
-			nFirst,nLast = self:find(sSeparator, nStart, bPlain)
-			nMax = nMax-1
-		end
-		aRecord[nField] = self:sub(nStart)
-	end
+        local nField=1 nStart=1
+        local nFirst,nLast = self:find(sSeparator, nStart, bPlain)
+        while nFirst and nMax ~= 0 do
+            aRecord[nField] = self:sub(nStart, nFirst-1)
+            nField = nField+1
+            nStart = nLast+1
+            nFirst,nLast = self:find(sSeparator, nStart, bPlain)
+            nMax = nMax-1
+        end
+        aRecord[nField] = self:sub(nStart)
+    end
 
-	return aRecord
+    return aRecord
 end
 
 function sleep(sec)
@@ -124,7 +124,7 @@ function ocr(data)
     img_name = 'code.jpg'
     local img_file = io.open(img_name, 'wb')
     img_file:write(data)
-	img_file:flush()
+    img_file:flush()
     img_file:close()
 
 --~         return 5
@@ -132,29 +132,29 @@ function ocr(data)
         io.popen('djpeg -bmp code.jpg > code.bmp')
         img_name = 'code.bmp'
 --~             return 6
-	end
-	os.setenv('TESSDATA_PREFIX', './')
+    end
+    os.setenv('TESSDATA_PREFIX', './')
     args = 'tesseract.exe '..img_name..' ocr nobatch digits'
 
 --~     proc = io.popen(args)
-	if ISWIN then
-		require('luacom')
-		wsh = luacom.CreateObject('WScript.Shell')
-		ret = wsh:Run(args,0,true)
---~ 		print(ret)
---~ 	repeat
---~ 		os.sleep(0.1)
---~ 	until ret.Status ~= 0
+    if ISWIN then
+        require('luacom')
+        wsh = luacom.CreateObject('WScript.Shell')
+        ret = wsh:Run(args,0,true)
+--~         print(ret)
+--~     repeat
+--~         os.sleep(0.1)
+--~     until ret.Status ~= 0
 
 --~
---~ 		pid = os.spawn{'tesseract',img_name,'ocr'}
---~ 		retcode = pid:wait(pid)
-	else
-		retcode = os.execute(args)
-	end
+--~         pid = os.spawn{'tesseract',img_name,'ocr'}
+--~         retcode = pid:wait(pid)
+    else
+        retcode = os.execute(args)
+    end
 --~     if retcode ~= 0 then
 --~         return 7
---~ 	end
+--~     end
     local f = io.input('ocr.txt')
     s = f:read()
     f:close()
@@ -162,15 +162,15 @@ function ocr(data)
 --~         sleep(0.5)
 --~     until pcall(
 --~         function ()
---~ 			sleep(0.5)
+--~             sleep(0.5)
 --~             local f = io.input('ocr.txt')
 --~             s = f:read()--.strip()
 --~             f:close()
 --~             return true
 --~         end
 --~     )
-	os.remove('ocr.txt')
-	os.remove(img_name)
+    os.remove('ocr.txt')
+    os.remove(img_name)
     return s
 end
 
@@ -186,7 +186,7 @@ function verify(userid, passwd, headers)
     s = ocr(imgdata)
     if type(s) ~= 'string' then return s end
 
---~ 	os.exit()
+--~     os.exit()
 
     request_body = 'user_id='..userid..'&passwd='..passwd..'&validateCode='..s
 
@@ -228,32 +228,32 @@ function checkflow(userid, passwd)
 
     headers['Cookie'] = h['set-cookie']
 
-	res = verify(userid, passwd, headers)
---~ 	if res == msgs.ERR_CODE then
-	if res ~= nil then
-		return 1,res
---~ 		os.sleep(0.6)
---~ 		verify(userid, passwd, headers)
-	end
+    res = verify(userid, passwd, headers)
+--~     if res == msgs.ERR_CODE then
+    if res ~= nil then
+        return 1,res
+--~         os.sleep(0.6)
+--~         verify(userid, passwd, headers)
+    end
 
 --~     for i = 1, 5 do
 --~         local continue
---~ 		repeat
---~ 			res = verify(userid, passwd, headers)
+--~         repeat
+--~             res = verify(userid, passwd, headers)
 
---~ 			if res == nil then
---~ 				break
---~ 			elseif res == '验证码错误，请重新提交。' then
---~ 				sleep(0.6)
---~ 				continue = true;break
---~ 			else
---~ 				return res
+--~             if res == nil then
+--~                 break
+--~             elseif res == '验证码错误，请重新提交。' then
+--~                 sleep(0.6)
+--~                 continue = true;break
+--~             else
+--~                 return res
 --~             end
 
 --~             continue = true
 --~         until true
 --~         if not continue then break end
---~ 	end
+--~     end
 
     headers['Content-Length'] = nil
     http.request{
@@ -303,10 +303,10 @@ function con_auth(ul, bd, rf, tu)
 
     ret = table.concat(response_body)
 
-	if ret == '' then
-		print(msgs.ERR_CONNECTION)
-		return 1, msgs.ERR_CONNECTION
-	end
+    if ret == '' then
+        print(msgs.ERR_CONNECTION)
+        return 1, msgs.ERR_CONNECTION
+    end
 
     if os.getenv('LNA_DEBUG') then
         print(ret)
@@ -336,15 +336,15 @@ function con_auth(ul, bd, rf, tu)
         return 2, msgs.ERR_AUTH
     elseif string.find(ret, msgs.FND_FLOW) then
         print(msgs.ERR_FLOW)
-		return 7, msgs.ERR_FLOW
+        return 7, msgs.ERR_FLOW
     elseif string.find(ret, 'logout.htm') then
         print(msgs.MSG_LOGIN)
-		flow_available = string.format(msgs.MSG_FLOW_AVAILABLE,string.match(ret, match_flow_available))
-		print(flow_available)
-		return 0, flow_available
+        flow_available = string.format(msgs.MSG_FLOW_AVAILABLE,string.match(ret, match_flow_available))
+        print(flow_available)
+        return 0, flow_available
     elseif string.find(ret, 'Logout OK') then
         print(msgs.MSG_LOGOUT)
-		return 0, msgs.MSG_LOGOUT
+        return 0, msgs.MSG_LOGOUT
     else
         print(ret)
         return 1
@@ -371,7 +371,7 @@ function getLocalIP()
         end
 
     else
---~ 	the following code(8 lines) is from irserversb project (http://code.google.com/p/irserversb/)
+--~     the following code(8 lines) is from irserversb project (http://code.google.com/p/irserversb/)
         local ipaddr
         local cmd = io.popen('/sbin/ifconfig eth0')
         for line in cmd:lines() do
@@ -388,7 +388,7 @@ ip = getLocalIP()
 test_url = 'http://www.baidu.com/'
 
 function main()
-	print('Your IP: '..ip)
+    print('Your IP: '..ip)
 
     --~ logout
     if #arg == 1 then
@@ -413,10 +413,10 @@ function main()
     end
 
     if con_auth(url, body, referer, test_url) == 0 then
-		print(msgs.MSG_OK)
-	else
-		print(msgs.ERR)
-	end
+        print(msgs.MSG_OK)
+    else
+        print(msgs.ERR)
+    end
 end
 
 
