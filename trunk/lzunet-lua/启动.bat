@@ -1,1 +1,1 @@
-start .\lua5.1 lzunet.wlua
+start .\wlua lzunet.wlua
