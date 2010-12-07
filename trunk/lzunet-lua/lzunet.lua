@@ -154,8 +154,9 @@ function ocr(data)
 --~     if retcode ~= 0 then
 --~         return 7
 --~ 	end
-    local s
-	s = io.input('ocr.txt'):read()
+    local f = io.input('ocr.txt')
+    s = f:read()
+    f:close()
 --~     repeat
 --~         sleep(0.5)
 --~     until pcall(
@@ -167,8 +168,8 @@ function ocr(data)
 --~             return true
 --~         end
 --~     )
-	os.remove(img_name)
 	os.remove('ocr.txt')
+	os.remove(img_name)
     return s
 end
 
