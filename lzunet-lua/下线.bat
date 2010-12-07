@@ -1,3 +1,3 @@
 @cd /d %~p0
-@lua5.1 lzunet_gbk.lua logout
+@lua5.1 lzunet.lua logout
 @pause

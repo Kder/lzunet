@@ -1,7 +1,7 @@
 -- coding=utf-8 --
 --~ lzunet.lua v1.2
 --~ 兰大上网认证系统自动登录工具
---~ by Kder
+--~ by Kder [http://www.kder.info]
 --~ license: GPLv3
 
 require "socket"
@@ -26,9 +26,10 @@ msgs = {
 ["MSG_FLOW"] = '您本月已经使用的流量为 %s MB\n您本月已经上网 %s 小时',
 ["MSG_OK"] = '操作完成 OK',
 ["MSG_ABOUT"] = "兰大上网认证系统自动登录工具 \nlzunet 1.2\n作者： Kder\n项目主页： http://code.google.com/p/lzunet/ \nLicense : GPLv3",
-["MSG_LOGIN"] = "登录成功^_^ \nLogin Successfully",
+["MSG_LOGIN"] = "登录成功^_^ Login Successfully",
+["MSG_FLOW_AVAILABLE"] = "您本月的可用流量为：%s",
 ["MSG_CONNECTED"] = '已连接 Connected',
-["MSG_LOGOUT"] = '您已经成功退出:-)\nLogout Successfully',
+["MSG_LOGOUT"] = '您已经成功退出:-) Logout Successfully',
 ["FND_UNAVAILABLE"] = '不可用',
 ["FND_EXPIRED"] = '过期',
 ["FND_EXCEEDED"] = '范围',
@@ -53,15 +54,17 @@ lzunet - 兰大上网认证系统自动登录工具。
 使用方法
 
     解压后，修改lzunet.txt，把自己的用户名和密码填入。
-	运行 start.bat(Windows下) 或 lzunet.wlua(linux下) 就会出来主界面。
+	运行 启动.bat(Windows下) 或 lzunet.wlua(linux下) 就会出现主界面。
 
 	]],
 }
 
-
-option1 = '>.?[%d.]+&nbsp;.?.?M'
-option2 = '>[%d.]+&nbsp;.?.?H'
-option3 = '<font color=red>%S+'
+--~ option = 'alert("(.-M)");'
+--~ option = '%b()'
+match_flow_available = '[%d.]- M'
+match_flow_used = '>.?[%d.]+&nbsp;.?.?M'
+match_time_used = '>[%d.]+&nbsp;.?.?H'
+match_err_msg = '<font color=red>%S+'
 
 ISWIN = false
 if os.getenv("OS")=='Windows_NT' then
@@ -133,9 +136,18 @@ function ocr(data)
     args = 'tesseract '..img_name..' ocr'
 --~     proc = io.popen(args)
 	if ISWIN then
-		require "ex"
-		pid = os.spawn{"tesseract",img_name,'ocr'}
-		retcode = pid:wait(pid)
+		require('luacom')
+		require('ex')
+		wsh = luacom.CreateObject("WScript.Shell")
+		ret = wsh:Run(args,0,true)
+
+--~ 	repeat
+--~ 		os.sleep(0.1)
+--~ 	until ret.Status ~= 0
+
+--~ 		require "ex"
+--~ 		pid = os.spawn{"tesseract",img_name,'ocr'}
+--~ 		retcode = pid:wait(pid)
 	else
 		retcode = os.execute(args)
 	end
@@ -186,7 +198,7 @@ function verify(userid, passwd, headers)
         sink = ltn12.sink.table(response_body)
     }
     ret = table.concat(response_body)
-    err_found = string.match(ret, option3)
+    err_found = string.match(ret, match_err_msg)
     if err_found ~= nil then
         err = string.split(err_found,">",1)
 --~         print(err[2])
@@ -257,8 +269,8 @@ function checkflow(userid, passwd)
 
     local data = table.concat(response_body)
     if data ~= nil then
-        data1 = string.match(data, option1)
-        data2 = string.match(data, option2)
+        data1 = string.match(data, match_flow_used )
+        data2 = string.match(data, match_time_used)
 
         if data1 ~= nil and data2 ~= nil then
             mb = string.match(data1, "[%d.]+")
@@ -325,13 +337,16 @@ function con_auth(ul, bd, rf, tu)
 		return 7, msgs.ERR_FLOW
     elseif string.find(ret, 'logout.htm') then
         print(msgs.MSG_LOGIN)
+		flow_available = string.format(msgs.MSG_FLOW_AVAILABLE,string.match(ret, match_flow_available))
+		print(flow_available)
+		return 0, flow_available
     elseif string.find(ret, 'Logout OK') then
         print(msgs.MSG_LOGOUT)
+		return 0, msgs.MSG_LOGOUT
     else
         print(ret)
         return 1
     end
-    return 0
 end
 
 

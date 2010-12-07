@@ -24,7 +24,11 @@ function login()
     referer = 'http://1.1.1.1/'
 	retcode, msg = con_auth(url, body, referer, test_url)
 	if retcode == 0 then
-		iup.Message(msgs.MSG_OK, msgs.MSG_LOGIN)
+		if msg ~= nil then
+			iup.Message(msgs.MSG_OK, msgs.MSG_LOGIN..'\n'..msg)
+		else
+			iup.Message(msgs.MSG_OK, msgs.MSG_LOGIN)
+		end
     else
 		iup.Message("Error", msg)
 	end
@@ -52,8 +56,9 @@ function logout()
 	url = 'http://1.1.1.1/userout.magi'
 	body = 'imageField=logout&userout=logout'
 	referer = 'http://1.1.1.1/logout.htm'
-	if con_auth(url, body, referer, test_url) == 0 then
-		iup.Message(msgs.MSG_OK, msgs.MSG_LOGOUT)
+	retcode, msg = con_auth(url, body, referer, test_url)
+	if retcode == 0 then
+		iup.Message(msgs.MSG_OK, msg)
 	else
 		iup.Message("Error", msgs.ERR)
 	end
