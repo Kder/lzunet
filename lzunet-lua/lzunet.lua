@@ -4,47 +4,47 @@
 --~ by Kder [http://www.kder.info]
 --~ license: GPLv3
 
-require "socket"
-local http = require("socket.http")
-local ltn12 = require("ltn12")
-local ustr = require("icu.ustring")
+require 'socket'
+local http = require('socket.http')
+local ltn12 = require('ltn12')
+local ustr = require('icu.ustring')
 
 msgs = {
-["ERR"] = '发生错误，请稍后再试 Error occured. Please try again later.',
-["ERR_CODE"] = '验证码错误，请重新提交。',
-["ERR_CONF"] = '无法打开配置文件lzunet.txt或者文件格式错误，请确认文件存在，且格式为 邮箱 密码',
-["ERR_CONNECTION"] = '请检查网络是否连接正常\n',
-["ERR_EXCEEDED"] = '在线用户超出允许的范围：帐号已在别处登录，如果确认不是自己登录的，可以联系网络中心踢对方下线。',
-["ERR_EXPIRED"] = '帐号欠费，测试期间可携带校园卡来网络中心办理。 ',
-["ERR_UNAVAILABLE"] = '服务不可用，请稍后再试',
-["ERR_AUTH"] = '请检查lzunet.txt中的邮箱和密码是否正确(格式为"邮箱 密码"，不含引号)',
-["ERR_OCR"] = '请检查lzunet.txt中的邮箱和密码是否正确；如果设置正确，请稍候再试一次',
-["ERR_FLOW"] = '流量用完，可以在校内的网上转转，等下个月即可恢复。',
-["ERR_TESSERACT"] = 'tesseract错误，请确认tesseract是否正确安装',
-["ERR_DJPEG"] = 'djpeg错误，请确认libjpeg是否正确安装且djpeg命令可用',
-["ERR_IO"] = '文件写入错误，请确认程序所在目录有读写权限',
-["MSG_FLOW"] = '您本月已经使用的流量为 %s MB\n您本月已经上网 %s 小时',
-["MSG_OK"] = '操作完成 OK',
-["MSG_ABOUT"] = "兰大上网认证系统自动登录工具 \nlzunet 1.2\n作者： Kder\n项目主页： http://code.google.com/p/lzunet/ \nLicense : GPLv3",
-["MSG_LOGIN"] = "登录成功^_^ Login Successfully",
-["MSG_FLOW_AVAILABLE"] = "您本月的可用流量为：%s",
-["MSG_CONNECTED"] = '已连接 Connected',
-["MSG_LOGOUT"] = '您已经成功退出:-) Logout Successfully',
-["FND_UNAVAILABLE"] = '不可用',
-["FND_EXPIRED"] = '过期',
-["FND_EXCEEDED"] = '范围',
-["FND_FLOW"] = '限制',
-["TITLE_FILE"] = '文件',
-["TITLE_HELP"] = '帮助',
-["TITLE_LOGIN"] = '登录外网',
-["TITLE_LOGOUT"] = "退出外网",
-["TITLE_EXIT"] = "退出程序",
-["TITLE_ABOUT"] = '关于',
-["TITLE_IP"] = "本机IP",
-["TITLE_USAGE"] = '用法',
-["TITLE_ERR"] = '错误',
-["TITLE_FLOW"] = '流量查询',
-["USAGE"] = [[
+['ERR'] = '发生错误，请稍后再试 Error occured. Please try again later.',
+['ERR_CODE'] = '验证码错误，请重新提交。',
+['ERR_CONF'] = '无法打开配置文件lzunet.txt或者文件格式错误，请确认文件存在，且格式为 邮箱 密码',
+['ERR_CONNECTION'] = '请检查网络是否连接正常\n',
+['ERR_EXCEEDED'] = '在线用户超出允许的范围：帐号已在别处登录，如果确认不是自己登录的，可以联系网络中心踢对方下线。',
+['ERR_EXPIRED'] = '帐号欠费，测试期间可携带校园卡来网络中心办理。 ',
+['ERR_UNAVAILABLE'] = '服务不可用，请稍后再试',
+['ERR_AUTH'] = '请检查lzunet.txt中的邮箱和密码是否正确(格式为"邮箱 密码"，不含引号)',
+['ERR_OCR'] = '请检查lzunet.txt中的邮箱和密码是否正确；如果设置正确，请稍候再试一次',
+['ERR_FLOW'] = '流量用完，可以在校内的网上转转，等下个月即可恢复。',
+['ERR_TESSERACT'] = 'tesseract错误，请确认tesseract是否正确安装',
+['ERR_DJPEG'] = 'djpeg错误，请确认libjpeg是否正确安装且djpeg命令可用',
+['ERR_IO'] = '文件写入错误，请确认程序所在目录有读写权限',
+['MSG_FLOW'] = '您本月已经使用的流量为 %s MB\n您本月已经上网 %s 小时',
+['MSG_OK'] = '操作完成 OK',
+['MSG_ABOUT'] = '兰大上网认证系统自动登录工具 \nlzunet 1.2\n作者： Kder\n项目主页： http://code.google.com/p/lzunet/ \nLicense : GPLv3',
+['MSG_LOGIN'] = '登录成功^_^ Login Successfully',
+['MSG_FLOW_AVAILABLE'] = '您本月的可用流量为：%s',
+['MSG_CONNECTED'] = '已连接 Connected',
+['MSG_LOGOUT'] = '您已经成功退出:-) Logout Successfully',
+['FND_UNAVAILABLE'] = '不可用',
+['FND_EXPIRED'] = '过期',
+['FND_EXCEEDED'] = '范围',
+['FND_FLOW'] = '限制',
+['TITLE_FILE'] = '文件',
+['TITLE_HELP'] = '帮助',
+['TITLE_LOGIN'] = '登录外网',
+['TITLE_LOGOUT'] = '退出外网',
+['TITLE_EXIT'] = '退出程序',
+['TITLE_ABOUT'] = '关于',
+['TITLE_IP'] = '本机IP',
+['TITLE_USAGE'] = '用法',
+['TITLE_ERR'] = '错误',
+['TITLE_FLOW'] = '流量查询',
+['USAGE'] = [[
 lzunet - 兰大上网认证系统自动登录工具。
 
 主要功能
@@ -67,19 +67,19 @@ match_time_used = '>[%d.]+&nbsp;.?.?H'
 match_err_msg = '<font color=red>%S+'
 
 ISWIN = false
-if os.getenv("OS")=='Windows_NT' then
+if os.getenv('OS')=='Windows_NT' then
 	ISWIN = true
 end
 
 function togbk(str)
-	return ustr.encode(ustr(str),"gbk")
+	return ustr.encode(ustr(str),'gbk')
 end
 
 
 
 if ISWIN then
 	for k,v in pairs(msgs) do
-		msgs[k] = ustr.encode(ustr(v),"gbk")
+		msgs[k] = ustr.encode(ustr(v),'gbk')
 	end
 end
 
@@ -137,16 +137,15 @@ function ocr(data)
 --~     proc = io.popen(args)
 	if ISWIN then
 		require('luacom')
-		require('ex')
-		wsh = luacom.CreateObject("WScript.Shell")
+		wsh = luacom.CreateObject('WScript.Shell')
 		ret = wsh:Run(args,0,true)
 
 --~ 	repeat
 --~ 		os.sleep(0.1)
 --~ 	until ret.Status ~= 0
 
---~ 		require "ex"
---~ 		pid = os.spawn{"tesseract",img_name,'ocr'}
+--~ 		require 'ex'
+--~ 		pid = os.spawn{'tesseract',img_name,'ocr'}
 --~ 		retcode = pid:wait(pid)
 	else
 		retcode = os.execute(args)
@@ -177,23 +176,23 @@ function verify(userid, passwd, headers)
     --ocr识别验证码并登录认证系统
     response_body = {}
     http.request{
-        url = "http://a.lzu.edu.cn/servlet/AuthenCodeImage",
+        url = 'http://a.lzu.edu.cn/servlet/AuthenCodeImage',
         headers = headers,
         sink = ltn12.sink.table(response_body)
     }
     imgdata = table.concat(response_body)
     s = ocr(imgdata)
-    if type(s) ~= type("") then return s end
+    if type(s) ~= 'string' then return s end
 
 --~ 	os.exit()
 
     request_body = 'user_id='..userid..'&passwd='..passwd..'&validateCode='..s
 
-    headers["Content-Length"] = string.len(request_body)
+    headers['Content-Length'] = string.len(request_body)
     -- a post request
     http.request{
-        url = "http://a.lzu.edu.cn/selfLogonAction.do",
-        method = "POST",
+        url = 'http://a.lzu.edu.cn/selfLogonAction.do',
+        method = 'POST',
         headers = headers,
         source = ltn12.source.string(request_body),
         sink = ltn12.sink.table(response_body)
@@ -201,7 +200,7 @@ function verify(userid, passwd, headers)
     ret = table.concat(response_body)
     err_found = string.match(ret, match_err_msg)
     if err_found ~= nil then
-        err = string.split(err_found,">",1)
+        err = string.split(err_found,'>',1)
 --~         print(err[2])
         return err[2]
     end
@@ -211,21 +210,21 @@ function checkflow(userid, passwd)
     headers = {
             ['User-Agent'] = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/534.3 (KHTML, like Gecko) Chrome/6.0.472.63 Safari/534.3',
             ['Accept'] = 'application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5',
-            ["Content-Type"] =  "application/x-www-form-urlencoded",
+            ['Content-Type'] =  'application/x-www-form-urlencoded',
             ['Referer'] = rf
          }
     http.request{
-        url = "http://a.lzu.edu.cn",
+        url = 'http://a.lzu.edu.cn',
         headers = headers,
     }
 
 
     r, c, h = http.request{
-        url = "http://a.lzu.edu.cn/selfLogon.do",
+        url = 'http://a.lzu.edu.cn/selfLogon.do',
         headers = headers,
     }
 
-    headers["Cookie"] = h["set-cookie"]
+    headers['Cookie'] = h['set-cookie']
 
 	res = verify(userid, passwd, headers)
 --~ 	if res == msgs.ERR_CODE then
@@ -254,16 +253,16 @@ function checkflow(userid, passwd)
 --~         if not continue then break end
 --~ 	end
 
-    headers["Content-Length"] = nil
+    headers['Content-Length'] = nil
     http.request{
-        url = "http://a.lzu.edu.cn/selfIndexAction.do",
+        url = 'http://a.lzu.edu.cn/selfIndexAction.do',
         headers = headers
     }
 
     response_body = {}
 
     http.request{
-        url = "http://a.lzu.edu.cn/userQueryAction.do",
+        url = 'http://a.lzu.edu.cn/userQueryAction.do',
         headers = headers,
         sink = ltn12.sink.table(response_body)
     }
@@ -274,8 +273,8 @@ function checkflow(userid, passwd)
         data2 = string.match(data, match_time_used)
 
         if data1 ~= nil and data2 ~= nil then
-            mb = string.match(data1, "[%d.]+")
-            hour = string.match(data2, "[%d.]+")
+            mb = string.match(data1, '[%d.]+')
+            hour = string.match(data2, '[%d.]+')
         end
         if mb ~= nil then
             return mb, hour
@@ -288,12 +287,12 @@ function con_auth(ul, bd, rf, tu)
     response_body = {}
     http.request{
         url = ul,
-        method = "POST",
+        method = 'POST',
         headers = {
             ['User-Agent'] = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/534.3 (KHTML, like Gecko) Chrome/6.0.472.63 Safari/534.3',
             ['Accept'] = 'application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5',
-            ["Content-Length"] = string.len(request_body),
-            ["Content-Type"] =  "application/x-www-form-urlencoded",
+            ['Content-Length'] = string.len(request_body),
+            ['Content-Type'] =  'application/x-www-form-urlencoded',
             ['Referer'] = rf
          },
          source = ltn12.source.string(request_body),
@@ -355,11 +354,11 @@ end
 function getLocalIP()
     if ISWIN then
         require('luacom')
-        computer = "."
-        oWMIService = luacom.GetObject ("winmgmts:{impersonationLevel=Impersonate}!\\\\" ..computer.. "\\root\\cimv2")
-        oRefresher = luacom.CreateObject ("WbemScripting.SWbemRefresher")
-        refobjProcessor = oRefresher:AddEnum(oWMIService,"Win32_PerfFormattedData_PerfOS_Processor").ObjectSet
-        IPConfigSet = oWMIService:ExecQuery("Select IPAddress from Win32_NetworkAdapterConfiguration ")
+        computer = '.'
+        oWMIService = luacom.GetObject ('winmgmts:{impersonationLevel=Impersonate}!\\\\' ..computer.. '\\root\\cimv2')
+        oRefresher = luacom.CreateObject ('WbemScripting.SWbemRefresher')
+        refobjProcessor = oRefresher:AddEnum(oWMIService,'Win32_PerfFormattedData_PerfOS_Processor').ObjectSet
+        IPConfigSet = oWMIService:ExecQuery('Select IPAddress from Win32_NetworkAdapterConfiguration ')
         oRefresher:Refresh ()
 
         for index,item in luacomE.pairs (IPConfigSet) do
@@ -372,13 +371,13 @@ function getLocalIP()
     else
 --~ 	the following code(8 lines) is from irserversb project (http://code.google.com/p/irserversb/)
         local ipaddr
-        local cmd = io.popen("/sbin/ifconfig eth0")
+        local cmd = io.popen('/sbin/ifconfig eth0')
         for line in cmd:lines() do
-                ipaddr = string.match(line, "inet addr:([%d%.]+)")
+                ipaddr = string.match(line, 'inet addr:([%d%.]+)')
                 if ipaddr ~= nil then break end
         end
         cmd:close()
-        return ipaddr or "?.?.?.?"
+        return ipaddr or '?.?.?.?'
     end
 
 end

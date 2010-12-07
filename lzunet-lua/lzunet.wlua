@@ -1,18 +1,18 @@
 -- coding=utf-8 --
 
-require( "iuplua" )
---~ require("lzunet")
---~ if os.getenv("OS") == 'Windows_NT' then
---~     require("lzunet_gbk")
+require( 'iuplua' )
+--~ require('lzunet')
+--~ if os.getenv('OS') == 'Windows_NT' then
+--~     require('lzunet_gbk')
 --~ else
-    require("lzunet")
+    require('lzunet')
 --~ end
 --~ print(getLocalIP())
 
-f = io.open("lzunet.txt","r")
+f = io.open('lzunet.txt','r')
 s = f:read()
 --~ 	print(type(s))
-userpass = string.split(s," ",1)
+userpass = string.split(s,' ',1)
 userid,passwd = userpass[1],userpass[2]
 
 --~ code from http://lua-users.org/wiki/SplitJoin
@@ -30,7 +30,7 @@ function login()
 			iup.Message(msgs.MSG_OK, msgs.MSG_LOGIN)
 		end
     else
-		iup.Message("Error", msg)
+		iup.Message('Error', msg)
 	end
 end
 
@@ -39,9 +39,9 @@ function check()
 	print(MB,HOUR)
 --~ 	if string.find(MB, msgs.ERR_CODE) then
 	if HOUR == msgs.ERR_CODE then
-		iup.Message("Error", msgs.ERR)
+		iup.Message('Error', msgs.ERR)
 	elseif MB == 1 then
-		iup.Message("Error", HOUR)
+		iup.Message('Error', HOUR)
 	elseif HOUR ~= nil then
 		iup.Message(msgs.TITLE_FLOW,string.format(msgs.MSG_FLOW, MB, HOUR))
 	end
@@ -49,7 +49,7 @@ end
 
 function check_ip()
 
-	iup.Message("Your IP",ip)
+	iup.Message('Your IP',ip)
 end
 
 function logout()
@@ -60,7 +60,7 @@ function logout()
 	if retcode == 0 then
 		iup.Message(msgs.MSG_OK, msg)
 	else
-		iup.Message("Error", msgs.ERR)
+		iup.Message('Error', msgs.ERR)
 	end
 
 end
@@ -71,26 +71,26 @@ end
 
 function about()
 	iup.Message(msgs.TITLE_ABOUT,msgs.MSG_ABOUT)
-	size="QUARTERxQUARTER"
+	size='QUARTERxQUARTER'
 end
 
 function usage()
-	ml = iup.multiline{readonly = "YES", expand="YES", value=msgs.USAGE, border="NO", wordwrap = "YES" ,scrollbar = "NO"}
-	abt_dlg = iup.dialog{ml; title=msgs.TITLE_USAGE, size="280x280"}
+	ml = iup.multiline{readonly = 'YES', expand='YES', value=msgs.USAGE, border='NO', wordwrap = 'YES' ,scrollbar = 'NO'}
+	abt_dlg = iup.dialog{ml; title=msgs.TITLE_USAGE, size='280x280'}
 	abt_dlg:show()
 end
 
 
-item_about = iup.item {title = msgs.TITLE_ABOUT.."(A)", key = "K_A"} --, active = "NO"
-item_ip = iup.item {title = msgs.TITLE_IP.."(I)", key = "K_I"}
-item_usage = iup.item {title = msgs.TITLE_USAGE.."(U)", key = "K_U"}
-item_exit = iup.item {title = msgs.TITLE_EXIT.." Ctrl+Q", key = "K_x"}
+item_about = iup.item {title = msgs.TITLE_ABOUT..'(A)', key = 'K_A'} --, active = 'NO'
+item_ip = iup.item {title = msgs.TITLE_IP..'(I)', key = 'K_I'}
+item_usage = iup.item {title = msgs.TITLE_USAGE..'(U)', key = 'K_U'}
+item_exit = iup.item {title = msgs.TITLE_EXIT..' Ctrl+Q', key = 'K_x'}
 
 menu_file = iup.menu {item_exit}
 menu_help = iup.menu {item_ip, item_about, item_usage}
 
-submenu_file = iup.submenu {menu_file; title = msgs.TITLE_FILE.."(F)", key = "K_F"}
-submenu_help = iup.submenu {menu_help; title = msgs.TITLE_HELP.."(H)", key = "K_H"}
+submenu_file = iup.submenu {menu_file; title = msgs.TITLE_FILE..'(F)', key = 'K_F'}
+submenu_help = iup.submenu {menu_help; title = msgs.TITLE_HELP..'(H)', key = 'K_H'}
 
 -- Creates main menu with two submenus
 menu = iup.menu {submenu_file, submenu_help}
@@ -113,17 +113,17 @@ end
 
 -- press&release, active, ignore , , EIGHTHxEIGHTH
 
---~ , resize = "NO", menubox = "NO", maxbox = "NO", minbox = "NO"
+--~ , resize = 'NO', menubox = 'NO', maxbox = 'NO', minbox = 'NO'
 dlg = iup.dialog{ menu = menu,
 		iup.frame{
 		iup.vbox{iup.fill{},
 			iup.hbox{ iup.fill{}, buttons[1], iup.fill{}, buttons[2], iup.fill{} ;
-				alignment="ACENTER"
+				alignment='ACENTER'
 			},iup.fill{},
 			iup.hbox{ iup.fill{}, buttons[3], iup.fill{}, buttons[4], iup.fill{} ;
-				alignment="ACENTER"},iup.fill{},
+				alignment='ACENTER'},iup.fill{},
 			};
-		alignment = "ACENTER"},title = "lzunet 1.2",size = "120x80"
+		alignment = 'ACENTER'},title = 'lzunet 1.2',size = '120x80'
 	}
 
 
