@@ -60,7 +60,9 @@ proc con_auth { url body refer test_url } {
     } elseif { [string first "限制" $ret] != -1 } {
         put "流量用完，可以在校内的网上转转，等下个月即可恢复。"
     } elseif { [string first "logout.htm" $ret] != -1 } {
+    #puts [format "%.0f" [expr 5010-[regexp -inline {[\d.]+} $a]]]
         put "登录成功。Login successfully."
+        put [format "可用流量：%s M" [regexp -inline {[\d.]+} $ret]]
     } elseif { [string first "Logout OK" $ret] != -1 } {
         put "已下线。Logout successfully."
     } else {
