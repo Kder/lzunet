@@ -82,6 +82,7 @@ function gprint(str)
     print(togbk(str))
 end
 
+if not ISWIN then gprint = print end
 --~ if ISWIN then
 --~     for k,v in pairs(msgs) do
 --~         msgs[k] = string.Str:new(v):enc('gbk')
