@@ -8,7 +8,8 @@ require 'ex'
 require 'socket'
 local http = require('socket.http')
 local ltn12 = require('ltn12')
-local ustr = require('icu.ustring')
+--~ local ustr = require('icu.ustring')
+require 'ul_str'
 
 msgs = {
 ['ERR'] = '发生错误，请稍后再试 Error occured. Please try again later.',
@@ -73,16 +74,19 @@ if os.getenv('OS')=='Windows_NT' then
 end
 
 function togbk(str)
-    return ustr.encode(ustr(str),'gbk')
+--~     return ustr.encode(ustr(str),'gbk')
+    return string.Str:new(str):enc('gbk')
 end
 
-
-
-if ISWIN then
-    for k,v in pairs(msgs) do
-        msgs[k] = ustr.encode(ustr(v),'gbk')
-    end
+function gprint(str)
+    print(togbk(str))
 end
+
+--~ if ISWIN then
+--~     for k,v in pairs(msgs) do
+--~         msgs[k] = string.Str:new(v):enc('gbk')
+--~     end
+--~ end
 
 
 --~ code from http://lua-users.org/wiki/SplitJoin
@@ -141,7 +145,7 @@ function ocr(data)
         require('luacom')
         wsh = luacom.CreateObject('WScript.Shell')
         ret = wsh:Run(args,0,true)
---~         print(ret)
+--~         gprint(ret)
 --~     repeat
 --~         os.sleep(0.1)
 --~     until ret.Status ~= 0
@@ -203,7 +207,7 @@ function verify(userid, passwd, headers)
     err_found = string.match(ret, match_err_msg)
     if err_found ~= nil then
         err = string.split(err_found,'>',1)
---~         print(err[2])
+--~         gprint(err[2])
         return err[2]
     end
 end
@@ -304,49 +308,49 @@ function con_auth(ul, bd, rf, tu)
     ret = table.concat(response_body)
 
     if ret == '' then
-        print(msgs.ERR_CONNECTION)
+        gprint(msgs.ERR_CONNECTION)
         return 1, msgs.ERR_CONNECTION
     end
 
     if os.getenv('LNA_DEBUG') then
-        print(ret)
+        gprint(ret)
     end
 
---~     print(ul,bd,res)
+--~     gprint(ul,bd,res)
     if string.find(ret, msgs.FND_UNAVAILABLE) then
-        print(msgs.ERR_UNAVAILABLE)
+        gprint(msgs.ERR_UNAVAILABLE)
         return 6, msgs.ERR_UNAVAILABLE
     elseif string.find(ret, msgs.FND_EXPIRED) then
-        print(msgs.ERR_EXPIRED)
+        gprint(msgs.ERR_EXPIRED)
         return 5, msgs.ERR_EXPIRED
     elseif string.find(ret, msgs.FND_EXCEEDED) then
-        print(msgs.ERR_EXCEEDED)
+        gprint(msgs.ERR_EXCEEDED)
         return 4, msgs.ERR_EXCEEDED
     elseif string.find(ret, 'Timeout') then
         f = http.request(tu)
---~         print(f)
+--~         gprint(f)
         if string.find(f, 'Baid') then
-            print(msgs.MSG_CONNECTED)
---~         print('验证超时(不影响正常上网，请打开浏览器刷新页面即可) Timeout')
+            gprint(msgs.MSG_CONNECTED)
+--~         gprint('验证超时(不影响正常上网，请打开浏览器刷新页面即可) Timeout')
             return 0
         end
 
     elseif string.find(ret, 'Password error') then
-        print(msgs.ERR_AUTH)
+        gprint(msgs.ERR_AUTH)
         return 2, msgs.ERR_AUTH
     elseif string.find(ret, msgs.FND_FLOW) then
-        print(msgs.ERR_FLOW)
+        gprint(msgs.ERR_FLOW)
         return 7, msgs.ERR_FLOW
     elseif string.find(ret, 'logout.htm') then
-        print(msgs.MSG_LOGIN)
+        gprint(msgs.MSG_LOGIN)
         flow_available = string.format(msgs.MSG_FLOW_AVAILABLE,string.match(ret, match_flow_available))
-        print(flow_available)
+        gprint(flow_available)
         return 0, flow_available
     elseif string.find(ret, 'Logout OK') then
-        print(msgs.MSG_LOGOUT)
+        gprint(msgs.MSG_LOGOUT)
         return 0, msgs.MSG_LOGOUT
     else
-        print(ret)
+        gprint(ret)
         return 1
     end
 end
@@ -388,7 +392,7 @@ ip = getLocalIP()
 test_url = 'http://www.baidu.com/'
 
 function main()
-    print('Your IP: '..ip)
+    gprint('Your IP: '..ip)
 
     --~ logout
     if #arg == 1 then
@@ -403,7 +407,7 @@ function main()
         body = 'userid='..arg[1]..'&passwd='..arg[2]..'&serivce=internet&chap=0&random=internet'
         referer = 'http://1.1.1.1/'
     else
-        print([[usage:
+        gprint([[usage:
         logout:
             lzunet logout
         login:
@@ -413,9 +417,9 @@ function main()
     end
 
     if con_auth(url, body, referer, test_url) == 0 then
-        print(msgs.MSG_OK)
+        gprint(msgs.MSG_OK)
     else
-        print(msgs.ERR)
+        gprint(msgs.ERR)
     end
 end
 
