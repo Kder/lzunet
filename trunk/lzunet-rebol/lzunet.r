@@ -55,19 +55,3 @@ either ans
 [login] 
 [either ans = none [quit] [logout]]
 
-comment [	
-if find page "可用流量" [print ["登录成功 Login successfully."]]
-halt
-wait 2
-print page
-{POST /passwd.magi HTTP/1.1
-Host: 1.1.1.1:80
-User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/534.3 (KHTML, like Gecko) Chrome/6.0.472.63 Safari/534.3
-Accept: application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
-Content-Length: 36
-Content-Type: application/x-www-form-urlencoded
-
-userid=liulf06@lzu.cn&passwd=Wlrz 10
-}
-
-]
