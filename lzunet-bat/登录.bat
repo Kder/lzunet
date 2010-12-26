@@ -1,6 +1,17 @@
-::: -- Set the window size --
-MODE CON: COLS=50 LINES=20
 @echo off
+::: -- Set the window size --
+mode con cols=20 lines=2
+mode con cols=25 lines=4
+mode con cols=30 lines=6
+mode con cols=35 lines=8
+mode con cols=40 lines=10
+mode con cols=45 lines=12
+mode con cols=50 lines=14
+mode con cols=55 lines=16
+mode con cols=57 lines=18
+mode con cols=59 lines=19
+mode con cols=60 lines=20
+
 GOTO EndComment
 兰大上网认证系统自动登录工具。可以实现一键登录/一键下线，无需打开浏览器，
 无需再手动输入邮箱和密码。
