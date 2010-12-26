@@ -12,7 +12,7 @@ rem cls
 TITLE lzunet-bat 兰大上网认证系统登录程序
 color 79
 echo\
-set IP=219.246.62.167
+for /f "tokens=1,2 delims= " %%i in ('arp.exe -a ^| find "Interface"') do set IP=%%j
 cd /d %~dp0
 for /f "tokens=1,2* delims= " %%i in (lzunet.txt) do set userid=%%i&&set passwd=%%j
 
