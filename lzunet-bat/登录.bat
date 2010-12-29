@@ -34,32 +34,36 @@ curl -c %cookie%  --silent "http://202.201.1.140/portalReceiveAction.do?wlanuser
 
 curl -b %cookie% --silent --data "wlanuserip=%IP%&wlanacname=BAS_138&auth_type=PAP&wlanacIp=202.201.1.138&userid=%userid%&passwd=%passwd%&chal_id=&chal_vector=&seq_id=&req_id=" --referer "http://202.201.1.140/portalReceiveAction.do?wlanuserip=%IP%&wlanacname=BAS_138"  --user-agent "Mozilla/5.0 (Windows NT 5.1; rv:2.0b8) Gecko/20100101 Firefox/4.0b8" "http://202.201.1.140/portalAuthAction.do" -o %lzunet_temp%
 
-for /f "usebackq tokens=*" %%i in (`findstr /r "br>(.*)" %lzunet_temp%`) do set flow=%%i 
+for /f "usebackq tokens=*" %%i in (`findstr /r "您" %lzunet_temp%`) do set flow=%%i 
 for /f "usebackq tokens=*" %%i in (`findstr /r "alert(.*)" %lzunet_temp%`) do set rz=%%i 
-for /f "tokens=1,2 delims=(" %%a in ("%flow%") do set flow=%%b
-for /f "tokens=1,2 delims=)" %%b in ("%flow%") do set flow=%%b
+for /f "tokens=1,2 delims=您" %%a in ("%flow%") do set flow=%%b
 for /f "tokens=3 delims=(" %%j in ("%rz%") do set rz=%%j
+set flow=%flow:)=%
+set flow=%flow:;=%
+set flow=%flow:'=%
 set rz=%rz:);=%
 set rz=%rz:'=%
-rem echo rz is %rz% and flow is %flow%
-if "%rz%" neq "temp" (
+set rz=%rz:alert(=%
+rem echo rz is %rz% and flow is %flow% "%flow:~0,5%"
+if "%rz%" neq "temp " (
 	echo\
 rem 	echo %rz%>out
 rem ) else (
 rem     SETLOCAL ENABLEDELAYEDEXPANSION
 rem     set s=@@@%flow%
-
     if "帐号不存在！  " equ "%rz%" echo 请检查lzunet.txt中的邮箱和密码是否设置正确
+    if "您可用流量为" neq "%rz:~0,6%" (
+        echo %rz%
+    )
 )
 if "%flow%" neq "" (
-if "您可用流量为" equ "%flow:~0,6%" (
-    echo 登录成功。%flow%。
-) else (
-    echo %flow%
+    if "可用流量为" equ "%flow:~0,5%" (
+        echo 登录成功。%flow%。
+    ) else (
+        echo %flow%
+    )
 )
-if "您可用流量为" neq "%rz:~0,6%" (
-    echo %rz%
-)
+
 rem | find "alert" urlencode -ascii)
 echo\
 pause
