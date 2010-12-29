@@ -22,7 +22,7 @@ by Kder [http://www.kder.info]
     然后双击 登录.bat 即可登录。下线.bat 不必更改，要下线直接双击就行。
 :EndComment
 rem cls
-TITLE lzunet-bat 兰大上网认证系统登录程序
+TITLE lzunet-bat 兰大上网认证系统登录程序 by Kder
 echo\
 for /f "tokens=1,2 delims= " %%i in ('arp.exe -a ^| find "Interface"') do set IP=%%j
 cd /d %~dp0
