@@ -11,6 +11,7 @@ local ltn12 = require('ltn12')
 --~ local ustr = require('icu.ustring')
 require 'ul_str'
 
+
 msgs = {
 ['ERR'] = '发生错误，请稍后再试 Error occured. Please try again later.',
 ['ERR_CODE'] = '验证码错误，请重新提交。',
@@ -215,7 +216,7 @@ end
 
 function checkflow(userid, passwd)
     headers = {
-            ['User-Agent'] = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/534.3 (KHTML, like Gecko) Chrome/6.0.472.63 Safari/534.3',
+            ['User-Agent'] = 'Mozilla/5.0 (Windows NT 5.1; rv:2.0b8) Gecko/20100101 Firefox/4.0b8',
             ['Accept'] = 'application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5',
             ['Content-Type'] =  'application/x-www-form-urlencoded',
             ['Referer'] = rf
@@ -342,7 +343,7 @@ function con_auth(ul, bd, rf, tu)
     elseif string.find(ret, msgs.FND_FLOW) then
         gprint(msgs.ERR_FLOW)
         return 7, msgs.ERR_FLOW
-    elseif string.find(ret, 'logout.htm') then
+    elseif string.find(ret, 'M)') then
         gprint(msgs.MSG_LOGIN)
         flow_available = string.format(msgs.MSG_FLOW_AVAILABLE,string.match(ret, match_flow_available))
         gprint(flow_available)
@@ -392,21 +393,46 @@ end
 ip = getLocalIP()
 test_url = 'http://www.baidu.com/'
 
+f = io.open('lzunet.txt','r')
+s = f:read()
+
+userpass = string.split(s,' ',1)
+userid,passwd = userpass[1],userpass[2]
+
+
+function signout()
+--         url = 'http://202.201.1.140/portalDisconnAction.do'
+--         body = 'wlanuserip='..ip..'&wlanacname=BAS_138&wlanacIp=202.201.1.138&portalUrl=&usertime=3146400&imageField='
+--         referer = 'http://202.201.1.140/portalAuthAction.do'
+	url = 'http://1.1.1.1/userout.magi'
+	body = 'imageField=logout&userout=logout'
+	referer = 'http://1.1.1.1/logout.htm'
+	return url, body, referer
+end
+
+function signin()
+--    'http://202.201.1.140/portalReceiveAction.do?wlanuserip='..ip..'&wlanacname=BAS_138'
+	
+	url = 'http://202.201.1.140/portalAuthAction.do'
+	body = 'wlanuserip='..ip..'&wlanacname=BAS_138&auth_type=PAP&wlanacIp=202.201.1.138&userid='..(arg[1] or userid)..'&passwd='..(arg[2] or passwd)..'&chal_id=&chal_vector=&seq_id=&req_id='
+	referer = 'http://202.201.1.140/portalReceiveAction.do?wlanuserip='..ip..'&wlanacname=BAS_138'
+--      url = 'http://1.1.1.1/passwd.magi'
+--      body = 'userid='..arg[1]..'&passwd='..arg[2]..'&serivce=internet&chap=0&random=internet'
+--      referer = 'http://1.1.1.1/'
+	return url, body, referer
+end
+
 function main()
     gprint('Your IP: '..ip)
 
     --~ logout
     if #arg == 1 then
         if arg[1] == 'logout' then
-            url = 'http://1.1.1.1/userout.magi'
-            body = 'imageField=logout&userout=logout'
-            referer = 'http://1.1.1.1/logout.htm'
+			url, body, referer = signout()
         end
     --~ login
     elseif #arg == 2 then
-        url = 'http://1.1.1.1/passwd.magi'
-        body = 'userid='..arg[1]..'&passwd='..arg[2]..'&serivce=internet&chap=0&random=internet'
-        referer = 'http://1.1.1.1/'
+		url, body, referer = signin()
     else
         gprint([[usage:
         logout:

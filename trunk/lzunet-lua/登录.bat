@@ -1,4 +1,5 @@
-@cd /d %~p0
-@rem 【注意】邮箱和密码两边要加上半角(英文)引号，如下所示
-@lua5.1 lzunet.lua "test@lzu.cn" "testpassword"
-@pause
+@echo off
+cd /d %~p0
+for /f "tokens=1,2* delims= " %%i in (lzunet.txt) do set userid=%%i&&set passwd=%%j
+lua5.1 lzunet.lua %userid% %passwd%
+pause

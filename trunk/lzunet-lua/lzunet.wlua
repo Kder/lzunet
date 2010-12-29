@@ -4,18 +4,8 @@ require('lzunet')
 VCL = require'vcl'
 
 
-
-f = io.open('lzunet.txt','r')
-s = f:read()
-
-userpass = string.split(s,' ',1)
-userid,passwd = userpass[1],userpass[2]
-
-
 function login()
-    url = 'http://1.1.1.1/passwd.magi'
-    body = 'userid='..userid..'&passwd='..passwd..'&serivce=internet&chap=0&random=internet'
-    referer = 'http://1.1.1.1/'
+	url, body, referer =  signin()
     retcode, msg = con_auth(url, body, referer, test_url)
     if retcode == 0 then
         if msg ~= nil then
@@ -48,9 +38,7 @@ function check_ip()
 end
 
 function logout()
-    url = 'http://1.1.1.1/userout.magi'
-    body = 'imageField=logout&userout=logout'
-    referer = 'http://1.1.1.1/logout.htm'
+	url, body, referer = signout()
     retcode, msg = con_auth(url, body, referer, test_url)
     if retcode == 0 then
         VCL.MessageDlg(msg,'mtInformation', {'mbOK'})
