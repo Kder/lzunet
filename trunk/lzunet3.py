@@ -45,6 +45,7 @@ import urllib
 import urllib.request
 import urllib.parse
 import http.cookiejar
+import re
 
 
 def con_auth(ul, bd, rf, tu):
@@ -102,6 +103,8 @@ application/xml;q=0.9,*/*;q=0.8'),
     elif '限制' in ret:
         print('流量用完，可以在校内的网上转转，等下个月即可恢复。')
     elif 'M)' in ret:
+        match_flow_available = '[\d.]+ M'
+        print('您可用流量为 %s' % re.findall(match_flow_available, ret)[0])
         print('登录成功 Login successfully.')
     elif 'Logout OK' in ret:
         print('已下线 Logout successfully.')
@@ -203,7 +206,7 @@ if __name__ == '__main__':
     if len(sys.argv) == 2:
         if sys.argv[1] == 'logout':
             url = 'http://1.1.1.1/userout.magi'
-            body = (('imageField', 'logout'), ('userout', 'logout'))
+            body = (('imageField', 'logout'),)
             referer = ('Referer', 'http://1.1.1.1/logout.htm')
     #login
     elif len(sys.argv) == 3:
