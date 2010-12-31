@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-u'''兰大上网认证系统自动登录工具。可以实现一键登录/一键下线，无需打开浏览器，
+u'''
+lzunet for Python2
+
+兰大上网认证系统自动登录工具。可以实现一键登录/一键下线，无需打开浏览器，
 无需再手动输入邮箱和密码。
 
 用法：
@@ -47,9 +50,8 @@ def con_auth(ul, bd, rf, tu):
     cj = cookielib.CookieJar()
     op = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
     if sys.platform == 'win32':
-        op.addheaders = [('User-Agent', 'Mozilla/5.0 (Windows; U; \
-Windows NT 5.1; en-US) AppleWebKit/534.3 (KHTML, like Gecko) \
-Chrome/6.0.472.63 Safari/534.3'),
+        op.addheaders = [('User-Agent', 'Mozilla/5.0 (Windows NT 5.1; rv:2.0b8) \
+Gecko/20100101 Firefox/4.0b8'),
         ('Accept', 'application/xml,application/xhtml+xml,\
 text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5'),
                          rf]
@@ -88,7 +90,7 @@ q=0.9,*/*;q=0.8'), rf]
         return 1
     elif u'限制' in ret:
         print(u'流量用完，可以在校内的网上转转，等下个月即可恢复。')
-    elif 'logout.htm' in ret:
+    elif 'M)' in ret:
         print(u'登录成功 Login successfully.')
     elif 'Logout OK' in ret:
         print(u'已下线 Logout successfully.')
@@ -181,23 +183,30 @@ def get_ip():
 
 
 if __name__ == '__main__':
+	ip = get_ip()[0]
     #logout
     if len(sys.argv) == 2:
         if sys.argv[1] == 'logout':
             url = 'http://1.1.1.1/userout.magi'
-            body = (('imageField', 'logout'), ('userout', 'logout'))
+            body = (('imageField', 'logout'), 
+					('userout', 'logout'))
             referer = ('Referer', 'http://1.1.1.1/logout.htm')
     #login
     elif len(sys.argv) == 3:
-        url = 'http://1.1.1.1/passwd.magi'
+        url = 'http://202.201.1.140/portalAuthAction.do'
         body = (
         ('userid', sys.argv[1]),
         ('passwd', sys.argv[2]),
-        ('serivce', 'internet'),
-        ('chap', '0'),
-        ('random', 'internet'),
+        ('wlanuserip', ip),
+        ('wlanacname', 'BAS_138'),
+        ('auth_type', 'PAP'),
+        ('wlanacIp', '202.201.1.138'),
+		('chal_id', ''),
+		('chal_vector', ''),
+		('seq_id', ''),
+		('req_id', ''),
         )
-        referer = ('Referer', 'http://1.1.1.1/')
+        referer = ('Referer', 'http://202.201.1.140/portalReceiveAction.do?wlanuserip=%s&wlanacname=BAS_138' % ip)
     else:
         print(__doc__)
         sys.exit(3)
@@ -207,7 +216,7 @@ if __name__ == '__main__':
 
     try:
         if con_auth(url, body, referer, test_url) == 0:
-            print('Your IP: ' + str(get_ip()))
+            print('Your IP: ' + ip)
             print(u'操作完成 OK')
     except Exception as e:
         print(e)
