@@ -33,7 +33,7 @@ __license__ = 'GNU General Public License v3'
 __status__ = 'Release'
 __projecturl__ = 'http://code.google.com/p/lzunet/'
 
-__version__ = '1.1.0'
+__version__ = '1.1.1'
 __revision__ = "$Revision$"
 __date__ = '$Date$'
 __author__ = '$Author$'
