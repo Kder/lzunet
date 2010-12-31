@@ -1,3 +1,4 @@
-@cd /d %~p0
-@lzunet logout
-@pause
+@echo off
+cd /d %~p0
+startup.py logout
+pause

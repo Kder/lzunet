@@ -1,1 +1,1 @@
-python lzunet.py logout
+python startup.py logout

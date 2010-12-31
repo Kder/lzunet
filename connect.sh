@@ -1,1 +1,1 @@
-python lzunet.py "mail" "pass"
+python startup.py "mail" "pass"
