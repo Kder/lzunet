@@ -9,7 +9,7 @@ lzunet for Python3
 
 用法：
 
-    把下载到的压缩包中的“登录.bat”中的 "邮箱" "密码" 替换为你的邮箱和上网认证密码，保存，
+    把下载到的压缩包中的lzunet.txt中的 test@lzu.cn testpassword 替换为你的邮箱和上网认证密码，保存，
     然后双击 登录.bat 即可登录。"下线.bat"不必更改，要下线直接双击就行。
 
     Linux用户请svn checkout源代码，设置好connect.sh中对应的mail和pass，
