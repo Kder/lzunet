@@ -1,1 +1,0 @@
-start .\wlua lzunet.wlua
