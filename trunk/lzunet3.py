@@ -51,7 +51,7 @@ import re
 def con_auth(ul, bd, rf, tu):
     cj = http.cookiejar.CookieJar()
     op = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cj))
-    encoded_bd = bytes(urllib.parse.urlencode(bd), 'utf8')
+    encoded_bd = bytes(urllib.parse.urlencode(bd), 'gbk')
     # print(len(encoded_bd))
     if sys.platform == 'win32':
         op.addheaders = [('User-Agent', 'Mozilla/5.0 (Windows; U; \
@@ -72,8 +72,9 @@ application/xml;q=0.9,*/*;q=0.8'),
         rf]
     urllib.request.install_opener(op)
     req = urllib.request.Request(ul, encoded_bd)
-    # u = urllib.request.urlopen(req)
-    u = op.open(req)
+#    print('break',ul,encoded_bd)
+    u = urllib.request.urlopen(req)
+#    u = op.open(req)
     ret = u.read().decode('gb2312')
     if os.getenv('LNA_DEBUG'):
         print(ret)
@@ -106,7 +107,7 @@ application/xml;q=0.9,*/*;q=0.8'),
         match_flow_available = '[\d.]+ M'
         print('您可用流量为 %s' % re.findall(match_flow_available, ret)[0])
         print('登录成功 Login successfully.')
-    elif 'Logout OK' in ret:
+    elif '下线' in ret:
         print('已下线 Logout successfully.')
     return 0
 
@@ -205,9 +206,22 @@ if __name__ == '__main__':
     #logout
     if len(sys.argv) == 2:
         if sys.argv[1] == 'logout':
-            url = 'http://1.1.1.1/userout.magi'
-            body = (('imageField', 'logout'),)
-            referer = ('Referer', 'http://1.1.1.1/logout.htm')
+            url = 'http://202.201.1.140/portalDisconnAction.do'
+            referer = ('Referer',
+                       'http://202.201.1.140/portalAuthAction.do')
+            body = (('wlanuserip', ip),
+                    ('wlanacname', 'BAS_138'),
+                    ('wlanacIp','202.201.1.138'),
+                    ('portalUrl', ''),
+                    ('usertime', 3146400),
+                    ('imageField', ''),
+                    )
+                    
+#            url = 'http://1.1.1.1/userout.magi'
+#            body = (('imageField.x', 79),
+#                    ('imageField.y', 33)
+#            )
+#            referer = ('Referer', 'http://1.1.1.1/logout.htm')
     #login
     elif len(sys.argv) == 3:
         url = 'http://202.201.1.140/portalAuthAction.do'
