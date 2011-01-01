@@ -7,15 +7,15 @@ lzunet for Python2
 兰大上网认证系统自动登录工具。可以实现一键登录/一键下线，无需打开浏览器，
 无需再手动输入邮箱和密码。
 
-用法：
+基本用法：
 
-    把下载到的压缩包中的lzunet.txt中的 test@lzu.cn testpassword 替换为你的邮箱和上网认证密码，保存，
-    然后双击 登录.bat 即可登录。"下线.bat"不必更改，要下线直接双击就行。
+    1.把下载到的压缩包中的lzunet.txt中的 test@lzu.cn testpassword 替换为你的邮箱和上网认证密码，保存。
+    2.然后 Windows 和 Linux 用户分别运行下列文件即可。
+        登录：登录.bat 或 login.sh
+        退出：下线.bat 或 logout.sh
 
-    Linux用户请svn checkout源代码，设置好connect.sh中对应的mail和pass，
-    运行connect.sh即可登录，logout.sh不要修改，直接运行就可以下线。
-
-    要直接使用lzunet，命令格式为：
+其他用法【不建议】：
+    直接使用lzunet.py，命令格式为：
         登录：
             lzunet "邮箱" "密码"
         退出：
@@ -187,10 +187,20 @@ if __name__ == '__main__':
     #logout
     if len(sys.argv) == 2:
         if sys.argv[1] == 'logout':
-            url = 'http://1.1.1.1/userout.magi'
-            body = (('imageField', 'logout'), 
-					('userout', 'logout'))
-            referer = ('Referer', 'http://1.1.1.1/logout.htm')
+            url = 'http://202.201.1.140/portalDisconnAction.do'
+            referer = ('Referer',
+                       'http://202.201.1.140/portalAuthAction.do')
+            body = (('wlanuserip', ip),
+                    ('wlanacname', 'BAS_138'),
+                    ('wlanacIp','202.201.1.138'),
+                    ('portalUrl', ''),
+                    ('usertime', 3146400),
+                    ('imageField', ''),
+                    )
+#            url = 'http://1.1.1.1/userout.magi'
+#            body = (('imageField', 'logout'), 
+#					('userout', 'logout'))
+#            referer = ('Referer', 'http://1.1.1.1/logout.htm')
     #login
     elif len(sys.argv) == 3:
         url = 'http://202.201.1.140/portalAuthAction.do'
