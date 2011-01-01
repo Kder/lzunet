@@ -57,7 +57,7 @@ lzunet - 兰大上网认证系统自动登录工具。
 使用方法
 
     解压后，修改lzunet.txt，把自己的用户名和密码填入。
-    运行 启动.bat(Windows下) 或 lzunet.wlua(linux下) 就会出现主界面。
+    运行 启动图形界面.bat(Windows下) 或 lzunet.wlua(linux下) 就会出现主界面。
 
     ]],
 }
@@ -437,12 +437,7 @@ function main()
             url, body, referer = signout()    
         end
     else
-        gprint([[usage:
-        logout:
-            lzunet logout
-        login:
-            lzunet mail password
-        ]])
+        gprint(msgs.USAGE)
     --~     os.exit(3)
     end
 
