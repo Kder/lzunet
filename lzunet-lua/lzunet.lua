@@ -401,12 +401,12 @@ userid,passwd = userpass[1],userpass[2]
 
 
 function signout()
---         url = 'http://202.201.1.140/portalDisconnAction.do'
---         body = 'wlanuserip='..ip..'&wlanacname=BAS_138&wlanacIp=202.201.1.138&portalUrl=&usertime=3146400&imageField='
---         referer = 'http://202.201.1.140/portalAuthAction.do'
-	url = 'http://1.1.1.1/userout.magi'
-	body = 'imageField=logout&userout=logout'
-	referer = 'http://1.1.1.1/logout.htm'
+    url = 'http://202.201.1.140/portalDisconnAction.do'
+    body = 'wlanuserip='..ip..'&wlanacname=BAS_138&wlanacIp=202.201.1.138&portalUrl=&usertime=3146400&imageField='
+    referer = 'http://202.201.1.140/portalAuthAction.do'
+	-- url = 'http://1.1.1.1/userout.magi'
+	-- body = 'imageField=logout&userout=logout'
+	-- referer = 'http://1.1.1.1/logout.htm'
 	return url, body, referer
 end
 
