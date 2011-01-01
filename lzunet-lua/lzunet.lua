@@ -313,7 +313,10 @@ function con_auth(ul, bd, rf, tu)
         gprint(msgs.ERR_CONNECTION)
         return 1, msgs.ERR_CONNECTION
     end
-
+    
+    -- 将返回的字符串从gbk编码转为utf8编码
+    ret = string.Str:new(ret,'gbk'):enc('utf8')
+    
     if os.getenv('LNA_DEBUG') then
         gprint(ret)
     end
@@ -337,7 +340,7 @@ function con_auth(ul, bd, rf, tu)
             return 0
         end
 
-    elseif string.find(ret, 'Password error') then
+    elseif string.find(ret, '密码错误') then
         gprint(msgs.ERR_AUTH)
         return 2, msgs.ERR_AUTH
     elseif string.find(ret, msgs.FND_FLOW) then
@@ -348,7 +351,7 @@ function con_auth(ul, bd, rf, tu)
         flow_available = string.format(msgs.MSG_FLOW_AVAILABLE,string.match(ret, match_flow_available))
         gprint(flow_available)
         return 0, flow_available
-    elseif string.find(ret, 'Logout OK') then
+    elseif string.find(ret, '下线') then
         gprint(msgs.MSG_LOGOUT)
         return 0, msgs.MSG_LOGOUT
     else
