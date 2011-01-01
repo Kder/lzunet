@@ -417,7 +417,7 @@ function signin()
 --    'http://202.201.1.140/portalReceiveAction.do?wlanuserip='..ip..'&wlanacname=BAS_138'
 	
 	url = 'http://202.201.1.140/portalAuthAction.do'
-	body = 'wlanuserip='..ip..'&wlanacname=BAS_138&auth_type=PAP&wlanacIp=202.201.1.138&userid='..(arg[1] or userid)..'&passwd='..(arg[2] or passwd)..'&chal_id=&chal_vector=&seq_id=&req_id='
+	body = 'wlanuserip='..ip..'&wlanacname=BAS_138&auth_type=PAP&wlanacIp=202.201.1.138&userid='..(userid or arg[1])..'&passwd='..(passwd or arg[2])..'&chal_id=&chal_vector=&seq_id=&req_id='
 	referer = 'http://202.201.1.140/portalReceiveAction.do?wlanuserip='..ip..'&wlanacname=BAS_138'
 --      url = 'http://1.1.1.1/passwd.magi'
 --      body = 'userid='..arg[1]..'&passwd='..arg[2]..'&serivce=internet&chap=0&random=internet'
@@ -427,15 +427,15 @@ end
 
 function main()
     gprint('Your IP: '..ip)
-
-    --~ logout
-    if #arg == 1 then
-        if arg[1] == 'logout' then
-			url, body, referer = signout()
+    if arg ~= nil then
+        --~ login
+        if arg[1] == 'login' or #arg == 2 then
+            url, body, referer = signin()
+            print(body)
+        --~ logout
+        elseif arg[1] == 'logout' then
+            url, body, referer = signout()    
         end
-    --~ login
-    elseif #arg == 2 then
-		url, body, referer = signin()
     else
         gprint([[usage:
         logout:

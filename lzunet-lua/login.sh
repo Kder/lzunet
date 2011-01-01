@@ -1,1 +1,2 @@
-lua lzunet.lua test@lzu.cn testpassword
+lua lzunet.lua login
+#lua lzunet.lua test@lzu.cn testpassword
