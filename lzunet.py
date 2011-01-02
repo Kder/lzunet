@@ -44,6 +44,7 @@ import sys
 import urllib
 import urllib2
 import cookielib
+import re
 
 
 def con_auth(ul, bd, rf, tu):
@@ -91,6 +92,8 @@ q=0.9,*/*;q=0.8'), rf]
     elif u'限制' in ret:
         print(u'流量用完，可以在校内的网上转转，等下个月即可恢复。')
     elif 'M)' in ret:
+        match_flow_available = '[\d.]+ M'
+        print(u'您可用流量为 %s' % re.findall(match_flow_available, ret)[0])
         print(u'登录成功 Login successfully.')
     elif 'Logout OK' in ret:
         print(u'已下线 Logout successfully.')
@@ -183,7 +186,7 @@ def get_ip():
 
 
 if __name__ == '__main__':
-	ip = get_ip()[0]
+    ip = get_ip()[0]
     #logout
     if len(sys.argv) == 2:
         if sys.argv[1] == 'logout':
@@ -199,7 +202,7 @@ if __name__ == '__main__':
                     )
 #            url = 'http://1.1.1.1/userout.magi'
 #            body = (('imageField', 'logout'), 
-#					('userout', 'logout'))
+#                    ('userout', 'logout'))
 #            referer = ('Referer', 'http://1.1.1.1/logout.htm')
     #login
     elif len(sys.argv) == 3:
@@ -211,10 +214,10 @@ if __name__ == '__main__':
         ('wlanacname', 'BAS_138'),
         ('auth_type', 'PAP'),
         ('wlanacIp', '202.201.1.138'),
-		('chal_id', ''),
-		('chal_vector', ''),
-		('seq_id', ''),
-		('req_id', ''),
+        ('chal_id', ''),
+        ('chal_vector', ''),
+        ('seq_id', ''),
+        ('req_id', ''),
         )
         referer = ('Referer', 'http://202.201.1.140/portalReceiveAction.do?wlanuserip=%s&wlanacname=BAS_138' % ip)
     else:
