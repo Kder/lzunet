@@ -107,6 +107,13 @@ application/xml;q=0.9,*/*;q=0.8'),
         match_flow_available = '[\d.]+ M'
         print('您可用流量为 %s' % re.findall(match_flow_available, ret)[0])
         print('登录成功 Login successfully.')
+        try:
+            usertime = re.findall('''"usertime" value='(\d+)''', ret)[0]
+            # print(usertime)
+            with open('lzunet.ini','w') as f:
+                f.write(usertime)
+        except:
+            pass
     elif '下线' in ret:
         print('已下线 Logout successfully.')
     return 0
@@ -203,6 +210,15 @@ def get_ip():
 
 if __name__ == '__main__':
     ip = get_ip()[0]
+    usertime = None
+    try:
+        with open('lzunet.ini','r') as f:
+            usertime = f.readline().strip()
+    except:
+        pass
+    # x <- (0,180) y <- (0,50)
+    x = random.randrange(0,180)
+    y = random.randrange(0,50)
     #logout
     if len(sys.argv) == 2:
         if sys.argv[1] == 'logout':
@@ -213,8 +229,9 @@ if __name__ == '__main__':
                     ('wlanacname', 'BAS_138'),
                     ('wlanacIp','202.201.1.138'),
                     ('portalUrl', ''),
-                    ('usertime', 3146400),
-                    ('imageField', ''),
+                    ('usertime', usertime or 3146400),
+                    ('imageField.x', x),
+                    ('imageField.y', y)
                     )
                     
 #            url = 'http://1.1.1.1/userout.magi'
