@@ -98,7 +98,7 @@ application/xml;q=0.9,*/*;q=0.8'),
         except Exception as e:
             print('验证超时(不影响正常上网，请打开浏览器刷新页面即可) Timeout', e)
         return 2
-    elif 'Password error' in ret:
+    elif '密码错误' in ret:
         print('用户名或密码错误 Username or Password error')
         return 1
     elif '限制' in ret:

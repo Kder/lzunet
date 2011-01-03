@@ -1,4 +1,10 @@
 @echo off
+set PATHEXT=%PATHEXT%;.py;.pyw
 cd /d %~dp0
-startup.py logout
+if not exist startup.py (
+    lzunet logout
+) else (
+    .\startup logout
+)
+REM startup.py logout
 pause
