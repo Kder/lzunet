@@ -87,7 +87,7 @@ q=0.9,*/*;q=0.8'), rf]
         except:
             print(u'验证超时(不影响正常上网，请打开浏览器刷新页面即可) Timeout')
         return 2
-    elif 'Password error' in ret:
+    elif u'密码错误' in ret:
         print(u'用户名或密码错误 Username or Password error')
         return 1
     elif u'限制' in ret:
@@ -103,7 +103,7 @@ q=0.9,*/*;q=0.8'), rf]
                 f.write(usertime)
         except:
             pass
-    elif 'Logout OK' in ret:
+    elif u'下线' in ret:
         print(u'已下线 Logout successfully.')
     return 0
 

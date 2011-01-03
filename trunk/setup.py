@@ -1,9 +1,14 @@
 #encoding:utf-8
 
+import os
+import sys
+import shutil
 from distutils.core import setup
 import py2exe
 import lzunet
 
+if len(sys.argv) == 1:
+    sys.argv.append('py2exe')
 #class Target:
 #    def __init__(self, **kw):
         # for the versioninfo resources
@@ -44,3 +49,10 @@ setup(name = "lzunet",
                   }
                 },
 )
+try:
+    os.remove('./lzunet.exe')
+    shutil.move('dist/lzunet.exe', '.')
+    os.system('upx lzunet.exe')
+    os.system(u'7z a lzunet-%s-win.7z lzunet.exe lzunet.txt 登录.bat 下线.bat'.encode('gbk') % lzunet.__version__)
+except Exception,e:
+    sys.stderr.write(str(e))
