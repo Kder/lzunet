@@ -1,4 +1,4 @@
 @echo off
-cd /d %~p0
+cd /d %~dp0
 startup.py logout
 pause

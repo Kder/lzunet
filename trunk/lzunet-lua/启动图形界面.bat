@@ -1,1 +1,2 @@
-start .\wlua lzunet.wlua
+@cd /d %~dp0
+@start .\wlua lzunet.wlua
