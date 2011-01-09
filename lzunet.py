@@ -9,16 +9,18 @@ lzunet for Python2
 
 基本用法：
 
-    1.把下载到的压缩包中的lzunet.txt中的 test@lzu.cn testpassword 替换为你的邮箱和上网认证密码，保存。
-    2.然后 Windows 和 Linux 用户分别运行下列文件即可。
+    Windows 和 Linux 用户分别运行下列文件即可(首次运行时会提示输入账号信息)。
         登录：登录.bat 或 login.sh
-        退出：下线.bat 或 logout.sh
+        下线：下线.bat 或 logout.sh
+    
+    如果提示信息无法显示（例如在Linux终端下中文可能会乱码），可手动把lzunet.txt中的
+    test@lzu.cn testpassword 替换为你的邮箱和上网认证密码，保存，然后再运行对应的文件即可。
 
 其他用法【不建议】：
     直接使用lzunet.py，命令格式为：
         登录：
             lzunet "邮箱" "密码"
-        退出：
+        下线：
             lzunet logout
 
 '''
@@ -33,7 +35,7 @@ __license__ = 'GNU General Public License v3'
 __status__ = 'Release'
 __projecturl__ = 'http://code.google.com/p/lzunet/'
 
-__version__ = '1.1.1'
+__version__ = '1.2.0'
 __revision__ = "$Revision$"
 __date__ = '$Date$'
 __author__ = '$Author$'
@@ -46,7 +48,7 @@ import urllib2
 import cookielib
 import re
 import random
-
+import startup
 
 def con_auth(ul, bd, rf, tu):
     cj = cookielib.CookieJar()
@@ -196,6 +198,9 @@ def get_ip():
 if __name__ == '__main__':
     ip = get_ip()[0]
     usertime = None
+    userpass = startup.getuserpass()
+    if len(sys.argv) == 3:
+        userpass = (sys.argv[1], sys.argv[2])
     try:
         with open('lzunet.ini','r') as f:
             usertime = f.readline().strip()
@@ -204,6 +209,23 @@ if __name__ == '__main__':
     # x <- (0,180) y <- (0,50)
     x = random.randrange(0,180)
     y = random.randrange(0,50)
+    
+    #login
+    url = 'http://202.201.1.140/portalAuthAction.do'
+    body = (
+    ('userid', userpass[0]),
+    ('passwd', userpass[1]),
+    ('wlanuserip', ip),
+    ('wlanacname', 'BAS_138'),
+    ('auth_type', 'PAP'),
+    ('wlanacIp', '202.201.1.138'),
+    ('chal_id', ''),
+    ('chal_vector', ''),
+    ('seq_id', ''),
+    ('req_id', ''),
+    )
+    referer = ('Referer', 'http://202.201.1.140/portalReceiveAction.do?wlanuserip=%s&wlanacname=BAS_138' % ip)
+    
     #logout
     if len(sys.argv) == 2:
         if sys.argv[1] == 'logout':
@@ -222,25 +244,9 @@ if __name__ == '__main__':
 #            body = (('imageField', 'logout'), 
 #                    ('userout', 'logout'))
 #            referer = ('Referer', 'http://1.1.1.1/logout.htm')
-    #login
-    elif len(sys.argv) == 3:
-        url = 'http://202.201.1.140/portalAuthAction.do'
-        body = (
-        ('userid', sys.argv[1]),
-        ('passwd', sys.argv[2]),
-        ('wlanuserip', ip),
-        ('wlanacname', 'BAS_138'),
-        ('auth_type', 'PAP'),
-        ('wlanacIp', '202.201.1.138'),
-        ('chal_id', ''),
-        ('chal_vector', ''),
-        ('seq_id', ''),
-        ('req_id', ''),
-        )
-        referer = ('Referer', 'http://202.201.1.140/portalReceiveAction.do?wlanuserip=%s&wlanacname=BAS_138' % ip)
-    else:
-        print(__doc__)
-        sys.exit(3)
+        elif sys.argv[1] == 'help':
+            print(__doc__)
+            sys.exit(3)
 
     test_url = 'http://www.baidu.com/'
     #fenc = sys.getfilesystemencoding()
@@ -250,8 +256,8 @@ if __name__ == '__main__':
             print('Your IP: ' + ip)
             print(u'操作完成 OK')
     except Exception as e:
-        print(e)
         print(u'发生错误，请稍后再试 Error occured. Please try again later.')
+        print(e)
     #finally:
     #    raw_input('''请按回车键退出 Press Return to quit...
 #'''.decode('utf-8').encode(fenc))
