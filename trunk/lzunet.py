@@ -192,7 +192,7 @@ def get_ip():
     if sys.platform == 'win32':
         return [x for x in getIPAddresses()]
     else:
-        return get_ip_address('eth0')
+        return [get_ip_address('eth0')]
 
 
 if __name__ == '__main__':
