@@ -1,1 +1,2 @@
-python startup.py login
+#!/usr/bin/sh
+python startup.py
