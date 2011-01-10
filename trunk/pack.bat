@@ -1,7 +1,7 @@
-@cd /d %~dp0
-REM F:\Python27\python.exe setup.py py2exe && upx dist/lzunet.exe
-REM move dist\lzunet.exe .
-REM 7z a lzunet-1.1.0-win.7z lzunet.exe 登录.bat 下线.bat
-7z a -t7z -xr!*.svn* lzunet-lua-1.2-win.7z lzunet-lua
+@echo off
+cd /d %~dp0
+F:\Python27\python.exe setup.py py2exe
+move dist\lzunet.exe . && upx lzunet.exe
+7z a lzunet-1.2.0-win.7z lzunet.exe 登录.bat 下线.bat
 rem 7z a -tzip -xr!*.svn* lzunet-lua-1.2.3.zip lzunet-lua
-@pause
+pause

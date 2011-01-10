@@ -214,38 +214,23 @@ def get_ip():
 
 if __name__ == '__main__':
     ip = get_ip()[0]
-    usertime = None
-    userpass = startup.getuserpass()
-    if len(sys.argv) == 3:
-        userpass = (sys.argv[1], sys.argv[2])
-    try:
-        with open('lzunet.ini','r') as f:
-            usertime = f.readline().strip()
-    except:
-        pass
-    # x <- (0,180) y <- (0,50)
-    x = random.randrange(0,180)
-    y = random.randrange(0,50)
-    
-    #login
-    url = 'http://202.201.1.140/portalAuthAction.do'
-    body = (
-    ('userid', userpass[0]),
-    ('passwd', userpass[1]),
-    ('wlanuserip', ip),
-    ('wlanacname', 'BAS_138'),
-    ('auth_type', 'PAP'),
-    ('wlanacIp', '202.201.1.138'),
-    ('chal_id', ''),
-    ('chal_vector', ''),
-    ('seq_id', ''),
-    ('req_id', ''),
-    )
-    referer = ('Referer', 'http://202.201.1.140/portalReceiveAction.do?wlanuserip=%s&wlanacname=BAS_138' % ip)
-    
-    #logout
-    if len(sys.argv) == 2:
+    userpass = None
+    if len(sys.argv) == 1:
+        userpass = startup.getuserpass()
+    elif len(sys.argv) == 3:
+        userpass = (sys.argv[1], sys.argv[2]) 
+    elif len(sys.argv) == 2:
+        #logout
         if sys.argv[1] == 'logout':
+            usertime = None
+            try:
+                with open('lzunet.ini','r') as f:
+                    usertime = f.readline().strip()
+            except:
+                pass
+            # x <- (0,180) y <- (0,50)
+            x = random.randrange(0,180)
+            y = random.randrange(0,50)
             url = 'http://202.201.1.140/portalDisconnAction.do'
             referer = ('Referer',
                        'http://202.201.1.140/portalAuthAction.do')
@@ -261,9 +246,29 @@ if __name__ == '__main__':
 #            body = (('imageField', 'logout'), 
 #                    ('userout', 'logout'))
 #            referer = ('Referer', 'http://1.1.1.1/logout.htm')
-        elif sys.argv[1] == 'help':
+        else:
             print(__doc__)
             sys.exit(3)
+    else:
+        print(__doc__)
+        sys.exit(3)
+
+    if userpass:
+        #login
+        url = 'http://202.201.1.140/portalAuthAction.do'
+        body = (
+        ('userid', userpass[0]),
+        ('passwd', userpass[1]),
+        ('wlanuserip', ip),
+        ('wlanacname', 'BAS_138'),
+        ('auth_type', 'PAP'),
+        ('wlanacIp', '202.201.1.138'),
+        ('chal_id', ''),
+        ('chal_vector', ''),
+        ('seq_id', ''),
+        ('req_id', ''),
+        )
+        referer = ('Referer', 'http://202.201.1.140/portalReceiveAction.do?wlanuserip=%s&wlanacname=BAS_138' % ip)
 
     test_url = 'http://www.baidu.com/'
     #fenc = sys.getfilesystemencoding()
