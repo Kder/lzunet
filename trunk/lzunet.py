@@ -57,21 +57,21 @@ except:
     import cookielib as cookie
 
 
-LZUNET_MSGS = ('登录成功 Login successfully.',
-               '您可用流量为 %s',
-               '已下线 Logout successfully.',
-               '用户名或密码错误 Username or Password error',
+LZUNET_MSGS = ('登录成功\t Login successfully.',
+               '您可用流量为\t %.3f M',
+               '已下线\t Logout successfully.',
+               '用户名或密码错误\t Username or Password error',
                '在线用户超出允许的范围：帐号已在别处登录，如果确认不是自己登录的，\
                可以联系网络中心踢对方下线。',
                '帐号欠费，测试期间可携带校园卡来网络中心办理。',
                '服务不可用，请稍后再试',
                '流量用完，可以在校内的网上转转，等下个月即可恢复。:(',
-               '操作完成 OK',
-               '发生错误，请稍后再试 Error occured. Please try again later.',
+               '操作完成\t OK',
+               '发生错误，请稍后再试\t Error occured. Please try again later.',
                '请输入您的上网账号和密码\n',
                '账号：',
                '密码：',
-               '本机IP: '
+               '本机IP:\t\t '
                )
 LZUNET_FIND_STRS = ('M)',
                 '',
@@ -157,8 +157,9 @@ q=0.9,*/*;q=0.8'), rf]
         print(ret)
 
     if LZUNET_FIND_STRS[0] in ret:
-        match_flow_available = '[\d.]+ M'
-        print(LZUNET_MSGS[1] % re.findall(match_flow_available, ret)[0])
+        match_flow_available = '([\d.]+) M'
+        print(LZUNET_MSGS[1] %
+                float(re.findall(match_flow_available, ret)[0]))
         print(LZUNET_MSGS[0])
         try:
             usertime = re.findall('''"usertime" value='(\d+)''', ret)[0]
@@ -352,8 +353,6 @@ if __name__ == '__main__':
         referer = ('Referer', 'http://202.201.1.140/portalReceiveAction.do?wlanuserip=%s&wlanacname=BAS_138' % ip)
 
     test_url = 'http://www.baidu.com/'
-    #fenc = sys.getfilesystemencoding()
-
     try:
         if con_auth(url, body, referer, test_url) in (0, 2):
             print(LZUNET_MSGS[13] + ip)
