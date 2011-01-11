@@ -1,20 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-u'''
-lzunet for Python2
+'''
+lzunet %s by Kder < http://www.kder.info >
 
 兰大上网认证系统自动登录工具。可以实现一键登录/一键下线，无需打开浏览器，
 无需再手动输入邮箱和密码。
 
 基本用法：
-
     Windows 和 Linux 用户分别运行下列文件即可(首次运行时会提示输入账号信息)。
         登录：登录.bat 或 login.sh
         下线：下线.bat 或 logout.sh
-    
-    如果提示信息无法显示（例如在Linux终端下中文可能会乱码），可手动把lzunet.txt中的
-    test@lzu.cn testpassword 替换为你的邮箱和上网认证密码，保存，然后再运行对应的文件即可。
+
+    如果提示信息无法显示（例如在Linux终端下中文可能会乱码），可手动把lzunet.txt
+    中的 test@lzu.cn testpassword 替换为你的邮箱和上网认证密码，保存，然后再运行
+    上述对应的文件。
 
 其他用法【不建议】：
     直接使用lzunet.py，命令格式为：
@@ -35,24 +35,103 @@ __license__ = 'GNU General Public License v3'
 __status__ = 'Release'
 __projecturl__ = 'http://code.google.com/p/lzunet/'
 
-__version__ = '1.2.0'
-__revision__ = "$Revision$"
-__date__ = '$Date$'
-__author__ = '$Author$'
+__version__ = '1.3.0'
+__revision__ = "$Revision: 69 $"
+__date__ = '$Date: 2011-01-10 19:39:08 +0800 (星期一, 2011-01-10) $'
+__author__ = '$Author: kderlin $'
 
 
 import os
 import sys
-import urllib
-import urllib2
-import cookielib
 import re
+import locale
 import random
-import startup
+
+try:
+    import urllib.request as urlrequest
+    import urllib.parse as urlparse
+    import http.cookiejar as cookie
+except:
+    import urllib2 as urlrequest
+    import urllib as urlparse
+    import cookielib as cookie
+
+
+LZUNET_MSGS = ('登录成功 Login successfully.',
+               '您可用流量为 %s',
+               '已下线 Logout successfully.',
+               '用户名或密码错误 Username or Password error',
+               '在线用户超出允许的范围：帐号已在别处登录，如果确认不是自己登录的，\
+               可以联系网络中心踢对方下线。',
+               '帐号欠费，测试期间可携带校园卡来网络中心办理。',
+               '服务不可用，请稍后再试',
+               '流量用完，可以在校内的网上转转，等下个月即可恢复。:(',
+               '操作完成 OK',
+               '发生错误，请稍后再试 Error occured. Please try again later.',
+               '请输入您的上网账号和密码\n',
+               '账号：',
+               '密码：',
+               '本机IP: '
+               )
+LZUNET_FIND_STRS = ('M)',
+                '',
+                '下线',
+                '密码错误',
+                '范围',
+                '过期',
+                '不可用'
+                '限制',
+                )
+
+
+path0 = sys.path[0]
+if os.path.isdir(sys.path[0]):
+    PROGRAM_PATH = path0
+else:
+    PROGRAM_PATH = os.path.dirname(path0)
+#    PROGRAM_PATH = os.path.join(path0, os.pardir)
+
+CONF = PROGRAM_PATH + os.sep + 'lzunet.txt'
+# CONF2 = PROGRAM_PATH + os.sep + 'lzunet.ini'
+SYS_ENCODING = locale.getdefaultlocale()[1]
+isPy2 = False
+if sys.version_info.major is 2:
+    isPy2 = True
+    input = raw_input
+    __doc__ = unicode(__doc__, 'utf-8').encode(SYS_ENCODING)
+    LZUNET_MSGS = [unicode(i, 'utf-8').encode(SYS_ENCODING) for i in LZUNET_MSGS]
+    LZUNET_FIND_STRS = [unicode(i, 'utf-8').encode(SYS_ENCODING) 
+                        for i in LZUNET_FIND_STRS]
+__doc__ = __doc__ % __version__
+
+
+def loadconf():
+    try:
+        f = open(CONF)
+        userpass = re.split('\s+', f.readline().strip(), maxsplit=1)
+        f.close()
+#    except Exception as e:
+    except:
+        return 8
+#        sys.stderr.write(str(e))
+    return userpass
+
+def getuserpass():
+    userpass = loadconf()
+    if userpass is 8 or userpass[0] == 'test@lzu.cn':
+        sys.stdout.write(LZUNET_MSGS[10])
+        userid = input(LZUNET_MSGS[11])
+        passwd = input(LZUNET_MSGS[12])
+        userpass = (userid, passwd)
+        if '' not in userpass:
+            with open(CONF,'w') as f:
+                f.write('%s %s' % userpass)
+    return userpass
+
 
 def con_auth(ul, bd, rf, tu):
-    cj = cookielib.CookieJar()
-    op = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
+    cj = cookie.CookieJar()
+    op = urlrequest.build_opener(urlrequest.HTTPCookieProcessor(cj))
     if sys.platform == 'win32':
         op.addheaders = [('User-Agent', 'Mozilla/5.0 (Windows NT 5.1; rv:2.0b8) \
 Gecko/20100101 Firefox/4.0b8'),
@@ -64,40 +143,23 @@ text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5'),
  en-US; rv:1.9.2.10) Gecko/20100916 Firefox/3.6.10'),
         ('Accept', 'text/html,application/xhtml+xml,application/xml;\
 q=0.9,*/*;q=0.8'), rf]
-    urllib2.install_opener(op)
-    req = urllib2.Request(ul, urllib.urlencode(bd))
-    u = urllib2.urlopen(req)
+
+    try:
+        encoded_bd = bytes(urlparse.urlencode(bd), 'gbk')
+    except:
+        encoded_bd = urlparse.urlencode(bd)
+
+    urlrequest.install_opener(op)
+    req = urlrequest.Request(ul, encoded_bd)
+    u = urlrequest.urlopen(req)
     ret = u.read().decode('gb2312')
     if os.getenv('LNA_DEBUG'):
         print(ret)
-    if u'不可用' in ret:
-        print(u'服务不可用，请稍后再试')
-        return 6
-    elif u'过期' in ret:
-        print(u'帐号欠费，测试期间可携带校园卡来网络中心办理。 ')
-        return 5
-    elif u'范围' in ret:
-        print(u'在线用户超出允许的范围：帐号已在别处登录，如果确认不是自己登录的，\
-可以联系网络中心踢对方下线。')
-        return 4
-    elif 'Timeout' in ret:
-        try:
-            f = urllib2.urlopen(tu).read(21)
-            if not ('PUBLIC' in f):
-                print(u'已连接 Connected')
-                return 0
-        except:
-            print(u'验证超时(不影响正常上网，请打开浏览器刷新页面即可) Timeout')
-        return 2
-    elif u'密码错误' in ret:
-        print(u'用户名或密码错误 Username or Password error')
-        return 1
-    elif u'限制' in ret:
-        print(u'流量用完，可以在校内的网上转转，等下个月即可恢复。')
-    elif 'M)' in ret:
+
+    if LZUNET_FIND_STRS[0] in ret:
         match_flow_available = '[\d.]+ M'
-        print(u'您可用流量为 %s' % re.findall(match_flow_available, ret)[0])
-        print(u'登录成功 Login successfully.')
+        print(LZUNET_MSGS[1] % re.findall(match_flow_available, ret)[0])
+        print(LZUNET_MSGS[0])
         try:
             usertime = re.findall('''"usertime" value='(\d+)''', ret)[0]
             # print(usertime)
@@ -105,14 +167,43 @@ q=0.9,*/*;q=0.8'), rf]
                 f.write(usertime)
         except:
             pass
-    elif u'下线' in ret:
-        print(u'已下线 Logout successfully.')
+    else:
+        for i in range(2, 8):
+            if LZUNET_FIND_STRS[i] in ret:
+                print(LZUNET_MSGS[i])
+                return i
+#    elif LZUNET_FIND_STRS[6] in ret:
+#        print(LZUNET_MSGS[6])
+#        return 6
+#    elif LZUNET_FIND_STRS[5] in ret:
+#        print(LZUNET_MSGS[5])
+#        return 5
+#    elif LZUNET_FIND_STRS[4] in ret:
+#        print(LZUNET_MSGS[4])
+#        return 4
+#    elif LZUNET_FIND_STRS[3] in ret:
+#        print(LZUNET_MSGS[2])
+#        return 1
+#    elif LZUNET_FIND_STRS[2] in ret:
+#        print(LZUNET_MSGS[7])
+#    elif LZUNET_FIND_STRS[1] in ret:
+#        print(LZUNET_MSGS[8])
+#    elif 'Timeout' in ret:
+#        try:
+#            f = urlrequest.urlopen(tu).read(21)
+#            if not ('PUBLIC' in f):
+#                print('已连接 Connected')
+#                return 0
+#        except:
+#            print(u'验证超时(不影响正常上网，请打开浏览器刷新页面即可) Timeout')
+#        return 2
+
     return 0
+
 
 # Get the IP address of local machine
 # code from:
 # http://hi.baidu.com/yangyingchao/blog/item/8d26b544f6059f45500ffe78.html
-
 
 # for Linux
 def get_ip_address(ifname):
@@ -179,13 +270,18 @@ def getIPAddresses():
     if rc == 0:
         for a in adapterList:
             adNode = a.ipAddressList
-            while True:
+            if isPy2:
+                while True:
+                    ipAddr = adNode.ipAddress
+                    if ipAddr:
+                        yield ipAddr
+                    adNode = adNode.next
+                    if not adNode:
+                        break
+            else:
                 ipAddr = adNode.ipAddress
                 if ipAddr:
                     yield ipAddr
-                adNode = adNode.next
-                if not adNode:
-                    break
 
 
 def get_ip():
@@ -197,9 +293,11 @@ def get_ip():
 
 if __name__ == '__main__':
     ip = get_ip()[0]
+    if isPy2:
+        ip = unicode(ip, 'utf-8').encode(SYS_ENCODING)
     userpass = None
     if len(sys.argv) == 1:
-        userpass = startup.getuserpass()
+        userpass = getuserpass()
     elif len(sys.argv) == 3:
         userpass = (sys.argv[1], sys.argv[2]) 
     elif len(sys.argv) == 2:
@@ -230,7 +328,7 @@ if __name__ == '__main__':
 #                    ('userout', 'logout'))
 #            referer = ('Referer', 'http://1.1.1.1/logout.htm')
         else:
-            print(__doc__)
+            sys.stdout.write(__doc__)
             sys.exit(3)
     else:
         print(__doc__)
@@ -257,11 +355,12 @@ if __name__ == '__main__':
     #fenc = sys.getfilesystemencoding()
 
     try:
-        if con_auth(url, body, referer, test_url) == 0:
-            print('Your IP: ' + ip)
-            print(u'操作完成 OK')
+        if con_auth(url, body, referer, test_url) in (0, 2):
+            print(LZUNET_MSGS[13] + ip)
+            print(LZUNET_MSGS[8])
+#    except Exception:# as e:
     except Exception as e:
-        print(u'发生错误，请稍后再试 Error occured. Please try again later.')
+        print(LZUNET_MSGS[9])
         print(e)
     #finally:
     #    raw_input('''请按回车键退出 Press Return to quit...
