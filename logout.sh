@@ -2,5 +2,5 @@
 SCRIPT=`readlink -f $0`
 SCRIPTPATH=`dirname $SCRIPT`
 pushd $SCRIPTPATH > /dev/null
-python startup.py logout
+python lzunet.py logout
 popd > /dev/null
