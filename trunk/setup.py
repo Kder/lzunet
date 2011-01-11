@@ -22,7 +22,7 @@ if len(sys.argv) == 1:
 
 #the dict is from http://osdir.com/ml/python.py2exe/2004-08/msg00065.html
 console_dict = {"script": "lzunet.py",
-#"icon_resources": [(0,'bialix.ico')],
+"icon_resources": [(0,'lzunet.ico')],
 "name": "lzunet",
 "version": '%s.%s' % (lzunet.__version__, lzunet.__revision__.split(':')[1][:-1].strip()),
 "description": u"一键登录兰大上网认证系统",
