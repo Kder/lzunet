@@ -172,32 +172,6 @@ q=0.9,*/*;q=0.8'), rf]
             if LZUNET_FIND_STRS[i] in ret:
                 print(LZUNET_MSGS[i])
                 return i
-#    elif LZUNET_FIND_STRS[6] in ret:
-#        print(LZUNET_MSGS[6])
-#        return 6
-#    elif LZUNET_FIND_STRS[5] in ret:
-#        print(LZUNET_MSGS[5])
-#        return 5
-#    elif LZUNET_FIND_STRS[4] in ret:
-#        print(LZUNET_MSGS[4])
-#        return 4
-#    elif LZUNET_FIND_STRS[3] in ret:
-#        print(LZUNET_MSGS[2])
-#        return 1
-#    elif LZUNET_FIND_STRS[2] in ret:
-#        print(LZUNET_MSGS[7])
-#    elif LZUNET_FIND_STRS[1] in ret:
-#        print(LZUNET_MSGS[8])
-#    elif 'Timeout' in ret:
-#        try:
-#            f = urlrequest.urlopen(tu).read(21)
-#            if not ('PUBLIC' in f):
-#                print('已连接 Connected')
-#                return 0
-#        except:
-#            print(u'验证超时(不影响正常上网，请打开浏览器刷新页面即可) Timeout')
-#        return 2
-
     return 0
 
 
@@ -323,10 +297,6 @@ if __name__ == '__main__':
                     ('imageField.x', x),
                     ('imageField.y', y)
                     )
-#            url = 'http://1.1.1.1/userout.magi'
-#            body = (('imageField', 'logout'), 
-#                    ('userout', 'logout'))
-#            referer = ('Referer', 'http://1.1.1.1/logout.htm')
         else:
             sys.stdout.write(__doc__)
             sys.exit(3)
@@ -361,7 +331,7 @@ if __name__ == '__main__':
         print(LZUNET_MSGS[9])
         print(e)
     #finally:
-    #    raw_input('''请按回车键退出 Press Return to quit...
+    #    input('''请按回车键退出 Press Return to quit...
 #'''.decode('utf-8').encode(fenc))
 
 
