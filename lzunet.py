@@ -36,9 +36,9 @@ __status__ = 'Release'
 __projecturl__ = 'http://code.google.com/p/lzunet/'
 
 __version__ = '1.3.0'
-__revision__ = "$Revision: 69 $"
-__date__ = '$Date: 2011-01-10 19:39:08 +0800 (星期一, 2011-01-10) $'
-__author__ = '$Author: kderlin $'
+__revision__ = "$Revision$"
+__date__ = '$Date$'
+__author__ = '$Author$'
 
 
 import os
@@ -59,15 +59,15 @@ except:
 
 LZUNET_MSGS = ('登录成功\t Login successfully.',
                '您可用流量为\t %.3f M',
-               '已下线\t Logout successfully.',
-               '用户名或密码错误\t Username or Password error',
+               '已下线\t\t Logout successfully.',
+               '用户名或密码错误 Username or Password error',
                '在线用户超出允许的范围：帐号已在别处登录，如果确认不是自己登录的，\
                可以联系网络中心踢对方下线。',
                '帐号欠费，测试期间可携带校园卡来网络中心办理。',
                '服务不可用，请稍后再试',
                '流量用完，可以在校内的网上转转，等下个月即可恢复。:(',
                '操作完成\t OK',
-               '发生错误，请稍后再试\t Error occured. Please try again later.',
+               '发生错误，请稍后再试\t\t Error occured. Please try again later.',
                '请输入您的上网账号和密码\n',
                '账号：',
                '密码：',
@@ -100,8 +100,7 @@ if sys.version_info.major is 2:
     input = raw_input
     __doc__ = unicode(__doc__, 'utf-8').encode(SYS_ENCODING)
     LZUNET_MSGS = [unicode(i, 'utf-8').encode(SYS_ENCODING) for i in LZUNET_MSGS]
-    LZUNET_FIND_STRS = [unicode(i, 'utf-8').encode(SYS_ENCODING) 
-                        for i in LZUNET_FIND_STRS]
+    LZUNET_FIND_STRS = [unicode(i, 'utf-8') for i in LZUNET_FIND_STRS]
 __doc__ = __doc__ % __version__
 
 
