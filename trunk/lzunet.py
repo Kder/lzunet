@@ -73,6 +73,7 @@ LZUNET_MSGS = ('登录成功\t Login successfully.\n',
                '密码：',
                '本机IP:\t\t ',
                '您可用流量为\t %.3f M\n',
+               '发生错误，请检查网络连接是否正常（网线没接好或者网络连接受限）\n',
                )
 LZUNET_FIND_STRS = ('M)',
                 '帐号不存在',
@@ -146,32 +147,33 @@ q=0.9,*/*;q=0.8'), rf]
         encoded_bd = bytes(urlparse.urlencode(bd), 'gbk')
     except:
         encoded_bd = urlparse.urlencode(bd)
-
     urlrequest.install_opener(op)
     req = urlrequest.Request(ul, encoded_bd)
-    u = urlrequest.urlopen(req)
+    try:
+        u = urlrequest.urlopen(req)
+    except:
+        sys.stdout.write(LZUNET_MSGS[15])
+        sys.exit(15)
     ret = u.read().decode('gb2312')
     if os.getenv('LNA_DEBUG'):
         sys.stdout.write(ret)
 
     if LZUNET_FIND_STRS[0] in ret:
-        match_flow_available = '([\d.]+) M'
-        sys.stdout.write(LZUNET_MSGS[14] %
-                float(re.findall(match_flow_available, ret)[0]))
-        sys.stdout.write(LZUNET_MSGS[0])
         try:
             usertime = re.findall('''"usertime" value='(\d+)''', ret)[0]
             # sys.stdout.write(usertime)
             with open('lzunet.ini','w') as f:
                 f.write(usertime)
+            flow_available = float(re.findall('([\d.]+) M', ret)[0])
+            return flow_available
         except:
-            pass
+            return -1
     else:
         for i in range(1, 8):
             if LZUNET_FIND_STRS[i] in ret:
                 sys.stdout.write(LZUNET_MSGS[i])
                 return i
-    return 0
+    
 
 
 # Get the IP address of local machine
@@ -281,12 +283,16 @@ def login(userpass):
     referer = ('Referer', 
     'http://202.201.1.140/portalReceiveAction.do?wlanuserip=%s&wlanacname=BAS_138' % ip)
     ret_code = con_auth(url, body, referer, test_url)
-    if ret_code is 0:
+    if isinstance(ret_code, float):
         for i in range(3):
             test_ret = urlrequest.urlopen(test_url).read()
             if 'Baidu' in str(test_ret):
-                sys.stdout.write(LZUNET_MSGS[8])
+                sys.stdout.write(LZUNET_MSGS[14] % ret_code)
+                sys.stdout.write(LZUNET_MSGS[0])
+#                sys.stdout.write(LZUNET_MSGS[8])
                 break
+        else:
+            login(userpass)
     return ret_code
 
 def logout():
@@ -349,7 +355,8 @@ if __name__ == '__main__':
         ip = unicode(ip, 'utf-8').encode(SYS_ENCODING)
     test_url = 'http://www.baidu.com/'
     try:
-        sys.exit(main())
+        main()
+#        sys.exit()
 #        pass
     except Exception:# as e:
         sys.stdout.write(LZUNET_MSGS[9])
