@@ -35,7 +35,7 @@ __license__ = 'GNU General Public License v3'
 __status__ = 'Release'
 __projecturl__ = 'http://code.google.com/p/lzunet/'
 
-__version__ = '1.3.1'
+__version__ = '1.3.2'
 __revision__ = "$Revision$"
 __date__ = '$Date$'
 __author__ = '$Author$'
@@ -48,10 +48,12 @@ import locale
 import random
 
 try:
+    import configparser as cp
     import urllib.request as urlrequest
     import urllib.parse as urlparse
     import http.cookiejar as cookie
 except:
+    import ConfigParser as cp
     import urllib2 as urlrequest
     import urllib as urlparse
     import cookielib as cookie
@@ -93,8 +95,9 @@ else:
     PROGRAM_PATH = os.path.dirname(path0)
 #    PROGRAM_PATH = os.path.join(path0, os.pardir)
 
-CONF = PROGRAM_PATH + os.sep + 'lzunet.txt'
-# CONF2 = PROGRAM_PATH + os.sep + 'lzunet.ini'
+CONF = PROGRAM_PATH + os.sep + 'lzunet.ini'
+config = cp.RawConfigParser()
+
 SYS_ENCODING = locale.getdefaultlocale()[1]
 isPy2 = False
 if sys.version_info.major is 2:
@@ -108,14 +111,22 @@ __doc__ = __doc__ % __version__
 
 def loadconf():
     try:
-        f = open(CONF)
-        userpass = re.split('\s+', f.readline().strip(), maxsplit=1)
-        f.close()
+        config.read(CONF)
+        userpass = (config.get('UserPass', 'UserID'), 
+                    config.get('UserPass', 'Password'))
+        usertime = config.get('AuthInfo', 'usertime')
+#        f = open(CONF)
+#        userpass = re.split('\s+', f.readline().strip(), maxsplit=1)
+#        f.close()
 #    except Exception as e:
     except:
         return 8
 #        sys.stderr.write(str(e))
-    return userpass
+    return userpass, usertime
+
+def saveconf():
+    with open(CONF,'w') as configfile:
+        config.write(configfile)
 
 def getuserpass():
     sys.stdout.write(LZUNET_MSGS[10])
@@ -123,8 +134,11 @@ def getuserpass():
     passwd = input(LZUNET_MSGS[12])
     userpass = (userid, passwd)
     if '' not in userpass:
-        with open(CONF,'w') as f:
-            f.write('%s %s' % userpass)
+        config.set('UserPass', 'UserID', userid)
+        config.set('UserPass', 'Password', passwd)
+        saveconf()
+#        with open(CONF,'w') as f:
+#            f.write('%s %s' % userpass)
     return userpass
 
 
@@ -161,8 +175,8 @@ q=0.9,*/*;q=0.8'), rf]
     if LZUNET_FIND_STRS[0] in ret:
         try:
             usertime = re.findall('''"usertime" value='(\d+)''', ret)[0]
-            with open('lzunet.ini','w') as f:
-                f.write(usertime)
+            config.set('AuthInfo', 'usertime', usertime)
+            saveconf()
         except:
             pass #return -1
         flow_available = float(re.findall('([\d.]+) M', ret)[0])
@@ -295,10 +309,11 @@ def login(userpass):
     return ret_code
 
 def logout():
-    usertime = None
+    usertime = 3146400
     try:
-        with open('lzunet.ini','r') as f:
-            usertime = f.readline().strip()
+        usertime = loadconf()[1]
+#        with open('lzunet.ini','r') as f:
+#            usertime = f.readline().strip()
     except:
         pass
     # x <- (0,180) y <- (0,50)
@@ -311,7 +326,7 @@ def logout():
             ('wlanacname', 'BAS_138'),
             ('wlanacIp','202.201.1.138'),
             ('portalUrl', ''),
-            ('usertime', usertime or 3146400),
+            ('usertime', usertime),
             ('imageField.x', x),
             ('imageField.y', y)
             )
@@ -321,7 +336,7 @@ def logout():
 def main():
     userpass = None
     if len(sys.argv) == 1:
-        userpass = loadconf()
+        userpass = loadconf()[0]
         if userpass is 8 or userpass[0] == 'test@lzu.cn':
             userpass = getuserpass()
     elif len(sys.argv) == 3:
@@ -353,6 +368,15 @@ if __name__ == '__main__':
     if isPy2:
         ip = unicode(ip, 'utf-8').encode(SYS_ENCODING)
     test_url = 'http://www.baidu.com/'
+    try:
+        config.read(CONF)
+    except:
+        config.add_section('UserPass')
+        config.set('UserPass', 'UserID', 'test@lzu.cn')
+        config.set('UserPass', 'Password', 'testpassword')
+        config.add_section('AuthInfo')
+        config.set('AuthInfo', 'usertime', '3146400')
+        saveconf()
     try:
         main()
 #        sys.exit()
