@@ -68,7 +68,7 @@ LZUNET_MSGS = ('登录成功\t Login successfully.\n',
                '流量用完，可以在校内的网上转转，等下个月即可恢复。:(\n',
                '操作完成\t OK.\n',
                '发生错误，请稍后再试\t Error occured. Please try again later.\n',
-               '请输入您的上网账号和密码\n',
+               '\n请输入您的上网账号和密码\n',
                '账号：',
                '密码：',
                '本机IP:\t\t '
@@ -116,15 +116,13 @@ def loadconf():
     return userpass
 
 def getuserpass():
-    userpass = loadconf()
-    if userpass is 8 or userpass[0] == 'test@lzu.cn':
-        sys.stdout.write(LZUNET_MSGS[10])
-        userid = input(LZUNET_MSGS[11])
-        passwd = input(LZUNET_MSGS[12])
-        userpass = (userid, passwd)
-        if '' not in userpass:
-            with open(CONF,'w') as f:
-                f.write('%s %s' % userpass)
+    sys.stdout.write(LZUNET_MSGS[10])
+    userid = input(LZUNET_MSGS[11])
+    passwd = input(LZUNET_MSGS[12])
+    userpass = (userid, passwd)
+    if '' not in userpass:
+        with open(CONF,'w') as f:
+            f.write('%s %s' % userpass)
     return userpass
 
 
@@ -289,7 +287,7 @@ def login(userpass):
             sys.stdout.write(LZUNET_MSGS[8])
     return ret_code
 
-def logout()
+def logout():
     usertime = None
     try:
         with open('lzunet.ini','r') as f:
@@ -322,7 +320,9 @@ if __name__ == '__main__':
 
     try:
         if len(sys.argv) == 1:
-            userpass = getuserpass()
+            userpass = loadconf()
+            if userpass is 8 or userpass[0] == 'test@lzu.cn':
+                userpass = getuserpass()
         elif len(sys.argv) == 3:
             userpass = (sys.argv[1], sys.argv[2]) 
         elif len(sys.argv) == 2:
