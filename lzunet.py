@@ -58,7 +58,7 @@ except:
 
 
 LZUNET_MSGS = ('登录成功\t Login successfully.\n',
-               '您可用流量为\t %.3f M\n',
+               '帐号不存在\n',
                '已下线\t\t Logout successfully.\n',
                '用户名或密码错误 Username or Password error.\n',
                '在线用户超出允许的范围：帐号已在别处登录，如果确认不是自己登录的，\
@@ -71,15 +71,16 @@ LZUNET_MSGS = ('登录成功\t Login successfully.\n',
                '\n请输入您的上网账号和密码\n',
                '账号：',
                '密码：',
-               '本机IP:\t\t '
+               '本机IP:\t\t ',
+               '您可用流量为\t %.3f M\n',
                )
 LZUNET_FIND_STRS = ('M)',
-                '',
+                '帐号不存在',
                 '下线',
                 '密码错误',
                 '范围',
                 '过期',
-                '不可用'
+                '不可用',
                 '限制',
                 )
 
@@ -155,7 +156,7 @@ q=0.9,*/*;q=0.8'), rf]
 
     if LZUNET_FIND_STRS[0] in ret:
         match_flow_available = '([\d.]+) M'
-        sys.stdout.write(LZUNET_MSGS[1] %
+        sys.stdout.write(LZUNET_MSGS[14] %
                 float(re.findall(match_flow_available, ret)[0]))
         sys.stdout.write(LZUNET_MSGS[0])
         try:
@@ -166,7 +167,7 @@ q=0.9,*/*;q=0.8'), rf]
         except:
             pass
     else:
-        for i in range(2, 8):
+        for i in range(1, 8):
             if LZUNET_FIND_STRS[i] in ret:
                 sys.stdout.write(LZUNET_MSGS[i])
                 return i
@@ -281,10 +282,11 @@ def login(userpass):
     'http://202.201.1.140/portalReceiveAction.do?wlanuserip=%s&wlanacname=BAS_138' % ip)
     ret_code = con_auth(url, body, referer, test_url)
     if ret_code is 0:
-        for i in range(2):
+        for i in range(3):
             test_ret = urlrequest.urlopen(test_url).read()
-        if 'Baidu' in str(test_ret):
-            sys.stdout.write(LZUNET_MSGS[8])
+            if 'Baidu' in str(test_ret):
+                sys.stdout.write(LZUNET_MSGS[8])
+                break
     return ret_code
 
 def logout():
@@ -311,40 +313,43 @@ def logout():
     ret_code = con_auth(url, body, referer, test_url)
     return ret_code
 
+def main():
+    userpass = None
+    if len(sys.argv) == 1:
+        userpass = loadconf()
+        if userpass is 8 or userpass[0] == 'test@lzu.cn':
+            userpass = getuserpass()
+    elif len(sys.argv) == 3:
+        userpass = (sys.argv[1], sys.argv[2]) 
+    elif len(sys.argv) == 2:
+        if sys.argv[1] == 'logout':
+            ret_code = logout()
+        elif sys.argv[1] == 'ip':
+            sys.stdout.write(LZUNET_MSGS[13] + ip)
+        else:
+            sys.stdout.write(__doc__)
+            sys.exit(3)
+    else:
+        sys.stdout.write(__doc__)
+        sys.exit(3)
+
+    if userpass:
+        ret_code = login(userpass)
+
+    if ret_code is 2:
+        sys.stdout.write(LZUNET_MSGS[8])
+    else:
+        while (ret_code is 3) or (ret_code is 1):
+            ret_code = login(getuserpass())
+    return ret_code
+
 if __name__ == '__main__':
     ip = get_ip()[0]
     if isPy2:
         ip = unicode(ip, 'utf-8').encode(SYS_ENCODING)
     test_url = 'http://www.baidu.com/'
-    userpass = None
-
     try:
-        if len(sys.argv) == 1:
-            userpass = loadconf()
-            if userpass is 8 or userpass[0] == 'test@lzu.cn':
-                userpass = getuserpass()
-        elif len(sys.argv) == 3:
-            userpass = (sys.argv[1], sys.argv[2]) 
-        elif len(sys.argv) == 2:
-            if sys.argv[1] == 'logout':
-                ret_code = logout()
-            elif sys.argv[1] == 'ip':
-                sys.stdout.write(LZUNET_MSGS[13] + ip)
-            else:
-                sys.stdout.write(__doc__)
-                sys.exit(3)
-        else:
-            sys.stdout.write(__doc__)
-            sys.exit(3)
-
-        if userpass:
-            ret_code = login(userpass)
-
-        if ret_code is 2:
-            sys.stdout.write(LZUNET_MSGS[8])
-        else:
-            while ret_code is 3:
-                ret_code = login(getuserpass())
+        sys.exit(main())
 #        pass
     except Exception:# as e:
         sys.stdout.write(LZUNET_MSGS[9])
