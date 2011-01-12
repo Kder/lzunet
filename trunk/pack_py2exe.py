@@ -62,7 +62,7 @@ try:
     os.remove('./lzunet.exe')
     shutil.move('dist/lzunet.exe', '.')
     os.system('upx lzunet.exe')
-    os.system(u'7z a lzunet-%s-win.7z lzunet.exe lzunet.ini 登录.bat 下线.bat'.encode('gbk') % lzunet.__version__)
+    os.system(u'7z a lzunet-%s.%s-win.7z lzunet.exe lzunet.ini 登录.bat 下线.bat'.encode(fenc) % (lzunet.__version__, rev))
     os.system(u'7z a lzunet-%s.%s-src.7z lzunet.py lzunet.ini login.sh logout.sh 登录.bat 下线.bat'.encode(fenc) % (lzunet.__version__, rev))
 except Exception,e:
     sys.stderr.write(str(e))
