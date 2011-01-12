@@ -269,6 +269,7 @@ if __name__ == '__main__':
     ip = get_ip()[0]
     if isPy2:
         ip = unicode(ip, 'utf-8').encode(SYS_ENCODING)
+
     userpass = None
     if len(sys.argv) == 1:
         userpass = getuserpass()
@@ -320,16 +321,22 @@ if __name__ == '__main__':
         ('req_id', ''),
         )
         referer = ('Referer', 'http://202.201.1.140/portalReceiveAction.do?wlanuserip=%s&wlanacname=BAS_138' % ip)
-
     test_url = 'http://www.baidu.com/'
+    ret_code = con_auth(url, body, referer, test_url)
     try:
-        if con_auth(url, body, referer, test_url) in (0, 2):
+        if ret_code is 0:
+            for i in range(2):
+                test_ret = urlrequest.urlopen(test_url).read()
+            if 'Baidu' in str(test_ret):
+                print(LZUNET_MSGS[13] + ip)
+                print(LZUNET_MSGS[8])
+        elif ret_code is 2:
             print(LZUNET_MSGS[13] + ip)
             print(LZUNET_MSGS[8])
-#    except Exception:# as e:
-    except Exception as e:
+#        pass
+    except Exception:# as e:
         print(LZUNET_MSGS[9])
-        print(e)
+#        print(e)
     #finally:
     #    input('''请按回车键退出 Press Return to quit...
 #'''.decode('utf-8').encode(fenc))
