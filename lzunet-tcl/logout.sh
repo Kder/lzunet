@@ -1,1 +1,0 @@
-tclsh lzunet.tcl logout
