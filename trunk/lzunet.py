@@ -110,6 +110,7 @@ __doc__ = __doc__ % __version__
 
 
 def loadconf():
+    userpass, usertime = 8, 3146400
     try:
         if config.read(CONF) != []:
             userpass = (config.get('UserPass', 'UserID'), 
@@ -127,7 +128,7 @@ def loadconf():
 #        f.close()
 #    except Exception as e:
     except:
-        return 8, 3146400
+        pass
 #        sys.stderr.write(str(e))
     return userpass, usertime
 
