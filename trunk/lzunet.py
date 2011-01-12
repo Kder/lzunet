@@ -161,13 +161,12 @@ q=0.9,*/*;q=0.8'), rf]
     if LZUNET_FIND_STRS[0] in ret:
         try:
             usertime = re.findall('''"usertime" value='(\d+)''', ret)[0]
-            # sys.stdout.write(usertime)
             with open('lzunet.ini','w') as f:
                 f.write(usertime)
-            flow_available = float(re.findall('([\d.]+) M', ret)[0])
-            return flow_available
         except:
-            return -1
+            pass #return -1
+        flow_available = float(re.findall('([\d.]+) M', ret)[0])
+        return flow_available
     else:
         for i in range(1, 8):
             if LZUNET_FIND_STRS[i] in ret:
