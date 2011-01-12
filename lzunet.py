@@ -117,24 +117,27 @@ def loadconf():
                         config.get('UserPass', 'Password'))
             usertime = config.get('AuthInfo', 'usertime')
         else:
-            config.add_section('UserPass')
-            config.set('UserPass', 'UserID', 'test@lzu.cn')
-            config.set('UserPass', 'Password', 'testpassword')
-            config.add_section('AuthInfo')
-            config.set('AuthInfo', 'usertime', '3146400')
-            saveconf()
+            createconf()
 #        f = open(CONF)
 #        userpass = re.split('\s+', f.readline().strip(), maxsplit=1)
 #        f.close()
 #    except Exception as e:
     except:
-        pass
+        createconf()
 #        sys.stderr.write(str(e))
     return userpass, usertime
 
 def saveconf():
     with open(CONF,'w') as configfile:
         config.write(configfile)
+
+def createconf():
+    config.add_section('UserPass')
+    config.set('UserPass', 'UserID', 'test@lzu.cn')
+    config.set('UserPass', 'Password', 'testpassword')
+    config.add_section('AuthInfo')
+    config.set('AuthInfo', 'usertime', '3146400')
+    saveconf()
 
 def getuserpass():
     sys.stdout.write(LZUNET_MSGS[10])
