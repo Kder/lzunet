@@ -7,6 +7,15 @@ from distutils.core import setup
 import py2exe
 import lzunet
 
+
+def checkdigit(x):
+  if x.isdigit():
+    return x
+
+rev = filter(checkdigit, lzunet.__revision__)
+
+fenc = sys.getfilesystemencoding()
+
 if len(sys.argv) == 1:
     sys.argv.append('py2exe')
 #class Target:
@@ -53,6 +62,7 @@ try:
     os.remove('./lzunet.exe')
     shutil.move('dist/lzunet.exe', '.')
     os.system('upx lzunet.exe')
-    os.system(u'7z a lzunet-%s-win.7z lzunet.exe lzunet.txt 登录.bat 下线.bat'.encode('gbk') % lzunet.__version__)
+    os.system(u'7z a lzunet-%s-win.7z lzunet.exe lzunet.ini 登录.bat 下线.bat'.encode('gbk') % lzunet.__version__)
+    os.system(u'7z a lzunet-%s.%s-src.7z lzunet.py lzunet.ini login.sh logout.sh 登录.bat 下线.bat'.encode(fenc) % (lzunet.__version__, rev))
 except Exception,e:
     sys.stderr.write(str(e))
