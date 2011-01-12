@@ -12,7 +12,7 @@ lzunet %s by Kder < http://www.kder.info >
         登录：登录.bat 或 login.sh
         下线：下线.bat 或 logout.sh
 
-    如果提示信息无法显示（例如在Linux终端下中文可能会乱码），可手动把lzunet.txt
+    如果提示信息无法显示（例如在Linux终端下中文可能会乱码），可手动把lzunet.ini
     中的 test@lzu.cn testpassword 替换为你的邮箱和上网认证密码，保存，然后再运行
     上述对应的文件。
 
@@ -111,16 +111,23 @@ __doc__ = __doc__ % __version__
 
 def loadconf():
     try:
-        config.read(CONF)
-        userpass = (config.get('UserPass', 'UserID'), 
-                    config.get('UserPass', 'Password'))
-        usertime = config.get('AuthInfo', 'usertime')
+        if config.read(CONF) != []:
+            userpass = (config.get('UserPass', 'UserID'), 
+                        config.get('UserPass', 'Password'))
+            usertime = config.get('AuthInfo', 'usertime')
+        else:
+            config.add_section('UserPass')
+            config.set('UserPass', 'UserID', 'test@lzu.cn')
+            config.set('UserPass', 'Password', 'testpassword')
+            config.add_section('AuthInfo')
+            config.set('AuthInfo', 'usertime', '3146400')
+            saveconf()
 #        f = open(CONF)
 #        userpass = re.split('\s+', f.readline().strip(), maxsplit=1)
 #        f.close()
 #    except Exception as e:
     except:
-        return 8
+        return 8, 3146400
 #        sys.stderr.write(str(e))
     return userpass, usertime
 
@@ -309,13 +316,7 @@ def login(userpass):
     return ret_code
 
 def logout():
-    usertime = 3146400
-    try:
-        usertime = loadconf()[1]
-#        with open('lzunet.ini','r') as f:
-#            usertime = f.readline().strip()
-    except:
-        pass
+    usertime = loadconf()[1]
     # x <- (0,180) y <- (0,50)
     x = random.randrange(0,180)
     y = random.randrange(0,50)
@@ -368,15 +369,7 @@ if __name__ == '__main__':
     if isPy2:
         ip = unicode(ip, 'utf-8').encode(SYS_ENCODING)
     test_url = 'http://www.baidu.com/'
-    try:
-        config.read(CONF)
-    except:
-        config.add_section('UserPass')
-        config.set('UserPass', 'UserID', 'test@lzu.cn')
-        config.set('UserPass', 'Password', 'testpassword')
-        config.add_section('AuthInfo')
-        config.set('AuthInfo', 'usertime', '3146400')
-        saveconf()
+
     try:
         main()
 #        sys.exit()
