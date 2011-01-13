@@ -35,7 +35,7 @@ __license__ = 'GNU General Public License v3'
 __status__ = 'Release'
 __projecturl__ = 'http://code.google.com/p/lzunet/'
 
-__version__ = '1.3.2'
+__version__ = '1.3.3'
 __revision__ = "$Revision$"
 __date__ = '$Date$'
 __author__ = '$Author$'
@@ -77,7 +77,7 @@ LZUNET_MSGS = ('登录成功\t Login successfully.\n',
                '您可用流量为\t %.3f M\n',
                '发生错误，请检查网络连接是否正常（网线没接好或者网络连接受限）\n',
                '本帐号已使用时间 : %d 分钟\n',
-               '本帐号已使用流量 : %d.%d MByte',
+               '本帐号已使用流量 : %d.%d MByte\n',
                )
 LZUNET_FIND_STRS = ('M)',
                 '帐号不存在',
@@ -160,6 +160,15 @@ def getuserpass():
 #            f.write('%s %s' % userpass)
     return userpass
 
+def process_ret(ret):
+    flow = re.findall("flow='([\d.]+)\s+'", ret)
+    time = re.findall("time='([\d.]+)\s+'", ret)
+    if flow != [] and time != []:
+        flow = int(flow[0])
+        time = int(time[0])
+        flow0=flow % 1024; flow1=flow - flow0; flow0 = flow0 * 1000; flow0 = flow0 - flow0 % 1024
+        sys.stdout.write(LZUNET_MSGS[16] % time)
+        sys.stdout.write(LZUNET_MSGS[17] % (flow1/1024, flow0/1024))
 
 def con_auth(ul, bd, rf, tu):
     cj = cookie.CookieJar()
@@ -193,19 +202,13 @@ q=0.9,*/*;q=0.8'), rf]
     ret = u.read().decode('gb2312')
     if os.getenv('LNA_DEBUG'):
         sys.stdout.write(ret)
+
+
     if LZUNET_FIND_STRS[8] in ret or LZUNET_FIND_STRS[9] in ret:
         return float(0)
     if LZUNET_FIND_STRS[10] in ret:
         sys.stdout.write(LZUNET_MSGS[2])
-    flow = re.findall("flow='([\d.]+)\s+'", ret)
-    time = re.findall("time='([\d.]+)\s+'", ret)
-    if flow != [] and time != []:
-        flow = int(flow[0])
-        time = int(time[0])
-        flow0=flow % 1024; flow1=flow - flow0; flow0 = flow0 * 1000; flow0 = flow0 - flow0 % 1024
-        sys.stdout.write(LZUNET_MSGS[16] % time)
-        sys.stdout.write(LZUNET_MSGS[17] % (flow1/1024, flow0/1024))
-
+        process_ret(ret)
     if LZUNET_FIND_STRS[0] in ret:
         usertime = re.findall('''"usertime" value='(\d+)''', ret)
         if usertime != []:
@@ -348,6 +351,9 @@ def login(userpass):
                 break
         else:
             login(userpass)
+    ret = urlrequest.urlopen('http://10.10.0.202/').read().decode('gb2312')
+#    print(str(ret))
+    process_ret(ret)
     return ret_code
 
 def logout():
