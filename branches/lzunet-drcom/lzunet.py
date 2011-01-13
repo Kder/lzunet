@@ -76,6 +76,8 @@ LZUNET_MSGS = ('登录成功\t Login successfully.\n',
                '本机IP:\t\t ',
                '您可用流量为\t %.3f M\n',
                '发生错误，请检查网络连接是否正常（网线没接好或者网络连接受限）\n',
+               '本帐号已使用时间 : %d 分钟\n',
+               '本帐号已使用流量 : %d.%d MByte',
                )
 LZUNET_FIND_STRS = ('M)',
                 '帐号不存在',
@@ -85,6 +87,12 @@ LZUNET_FIND_STRS = ('M)',
                 '过期',
                 '不可用',
                 '限制',
+                '您已经成功登录',#您已经成功登录。
+                                 #You have successfully logged into our system.
+                                 #在完成工作后，请别忘记注销。
+                                 #Please don't forget to log out after you have finished.
+                '请您确认要注销',
+                '注销成功',
                 )
 
 
@@ -168,12 +176,15 @@ text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5'),
         ('Accept', 'text/html,application/xhtml+xml,application/xml;\
 q=0.9,*/*;q=0.8'), rf]
 
-    try:
-        encoded_bd = bytes(urlparse.urlencode(bd), 'gbk')
-    except:
-        encoded_bd = urlparse.urlencode(bd)
     urlrequest.install_opener(op)
-    req = urlrequest.Request(ul, encoded_bd)
+    if bd:
+        try:
+            encoded_bd = bytes(urlparse.urlencode(bd), 'gbk')
+        except:
+            encoded_bd = urlparse.urlencode(bd)
+        req = urlrequest.Request(ul, encoded_bd)
+    else:
+        req = ul
     try:
         u = urlrequest.urlopen(req)
     except:
@@ -182,16 +193,29 @@ q=0.9,*/*;q=0.8'), rf]
     ret = u.read().decode('gb2312')
     if os.getenv('LNA_DEBUG'):
         sys.stdout.write(ret)
+    if LZUNET_FIND_STRS[8] in ret or LZUNET_FIND_STRS[9] in ret:
+        return float(0)
+    if LZUNET_FIND_STRS[10] in ret:
+        sys.stdout.write(LZUNET_MSGS[2])
+    flow = re.findall("flow='([\d.]+)\s+'", ret)
+    time = re.findall("time='([\d.]+)\s+'", ret)
+    if flow != [] and time != []:
+        flow = int(flow[0])
+        time = int(time[0])
+        flow0=flow % 1024; flow1=flow - flow0; flow0 = flow0 * 1000; flow0 = flow0 - flow0 % 1024
+        sys.stdout.write(LZUNET_MSGS[16] % time)
+        sys.stdout.write(LZUNET_MSGS[17] % (flow1/1024, flow0/1024))
 
     if LZUNET_FIND_STRS[0] in ret:
-        try:
-            usertime = re.findall('''"usertime" value='(\d+)''', ret)[0]
+        usertime = re.findall('''"usertime" value='(\d+)''', ret)
+        if usertime != []:
+            usertime = usertime[0]
             config.set('AuthInfo', 'usertime', usertime)
             saveconf()
-        except:
-            pass #return -1
-        flow_available = float(re.findall('([\d.]+) M', ret)[0])
-        return flow_available
+        flow_available = re.findall('([\d.]+) M', ret)
+        if flow_available != []:
+            flow_available = float([0])
+            return flow_available
     else:
         for i in range(1, 8):
             if LZUNET_FIND_STRS[i] in ret:
@@ -290,28 +314,35 @@ def get_ip():
         return [get_ip_address('eth0')]
 
 def login(userpass):
-    #login
-    url = 'http://202.201.1.140/portalAuthAction.do'
-    body = (
-    ('userid', userpass[0]),
-    ('passwd', userpass[1]),
-    ('wlanuserip', ip),
-    ('wlanacname', 'BAS_138'),
-    ('auth_type', 'PAP'),
-    ('wlanacIp', '202.201.1.138'),
-    ('chal_id', ''),
-    ('chal_vector', ''),
-    ('seq_id', ''),
-    ('req_id', ''),
-    )
-    referer = ('Referer', 
-    'http://202.201.1.140/portalReceiveAction.do?wlanuserip=%s&wlanacname=BAS_138' % ip)
+    url = 'http://10.10.0.202/'
+    referer = ('Referer', 'http://10.10.0.202/')
+    body = (('DDDDD', userpass[0]),
+            ('upass', userpass[1]),
+            ('0MKKey','登录 Login'),
+            ('v6ip', ''),
+            )
+
+    # url = 'http://202.201.1.140/portalAuthAction.do'
+    # body = (
+    # ('userid', userpass[0]),
+    # ('passwd', userpass[1]),
+    # ('wlanuserip', ip),
+    # ('wlanacname', 'BAS_138'),
+    # ('auth_type', 'PAP'),
+    # ('wlanacIp', '202.201.1.138'),
+    # ('chal_id', ''),
+    # ('chal_vector', ''),
+    # ('seq_id', ''),
+    # ('req_id', ''),
+    # )
+    # referer = ('Referer', 
+    # 'http://202.201.1.140/portalReceiveAction.do?wlanuserip=%s&wlanacname=BAS_138' % ip)
     ret_code = con_auth(url, body, referer, test_url)
     if isinstance(ret_code, float):
         for i in range(3):
             test_ret = urlrequest.urlopen(test_url).read()
-            if 'Baidu' in str(test_ret):
-                sys.stdout.write(LZUNET_MSGS[14] % ret_code)
+            if 'baidu' in str(test_ret):
+#                sys.stdout.write(LZUNET_MSGS[14] % ret_code)
                 sys.stdout.write(LZUNET_MSGS[0])
 #                sys.stdout.write(LZUNET_MSGS[8])
                 break
@@ -324,17 +355,20 @@ def logout():
     # x <- (0,180) y <- (0,50)
     x = random.randrange(0,180)
     y = random.randrange(0,50)
-    url = 'http://202.201.1.140/portalDisconnAction.do'
-    referer = ('Referer',
-               'http://202.201.1.140/portalAuthAction.do')
-    body = (('wlanuserip', ip),
-            ('wlanacname', 'BAS_138'),
-            ('wlanacIp','202.201.1.138'),
-            ('portalUrl', ''),
-            ('usertime', usertime),
-            ('imageField.x', x),
-            ('imageField.y', y)
-            )
+    # url = 'http://202.201.1.140/portalDisconnAction.do'
+    # referer = ('Referer',
+               # 'http://202.201.1.140/portalAuthAction.do')
+    # body = (('wlanuserip', ip),
+            # ('wlanacname', 'BAS_138'),
+            # ('wlanacIp','202.201.1.138'),
+            # ('portalUrl', ''),
+            # ('usertime', usertime),
+            # ('imageField.x', x),
+            # ('imageField.y', y)
+            # )
+    url = 'http://10.10.0.202/F.htm'
+    referer = ('Referer', 'http://10.10.0.202/')
+    body = None
     ret_code = con_auth(url, body, referer, test_url)
     return ret_code
 
@@ -372,12 +406,12 @@ if __name__ == '__main__':
     ip = get_ip()[0]
     if isPy2:
         ip = unicode(ip, 'utf-8').encode(SYS_ENCODING)
-    test_url = 'http://www.baidu.com/'
-
+    test_url = 'http://baidu.com/'
+    main()
     try:
-        main()
+#        main()
 #        sys.exit()
-#        pass
+        pass
     except Exception:# as e:
         sys.stdout.write(LZUNET_MSGS[9])
 #        sys.stdout.write(str(e))
