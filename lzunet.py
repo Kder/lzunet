@@ -357,10 +357,10 @@ def login(userpass):
     return ret_code
 
 def logout():
-    usertime = loadconf()[1]
+#    usertime = loadconf()[1]
     # x <- (0,180) y <- (0,50)
-    x = random.randrange(0,180)
-    y = random.randrange(0,50)
+#    x = random.randrange(0,180)
+#    y = random.randrange(0,50)
     # url = 'http://202.201.1.140/portalDisconnAction.do'
     # referer = ('Referer',
                # 'http://202.201.1.140/portalAuthAction.do')
@@ -413,10 +413,9 @@ if __name__ == '__main__':
     if isPy2:
         ip = unicode(ip, 'utf-8').encode(SYS_ENCODING)
     test_url = 'http://baidu.com/'
-    main()
+#    main()
     try:
-#        main()
-#        sys.exit()
+        main()
         pass
     except Exception:# as e:
         sys.stdout.write(LZUNET_MSGS[9])
