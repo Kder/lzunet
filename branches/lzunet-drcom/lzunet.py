@@ -110,8 +110,8 @@ TFMMSG = {0: '',
           9: "新密码与确认新密码不匹配,不能修改\n",
           10: "密码修改成功\n",
           11: "本帐号只能在指定地址使用\n", #:+pp+mac
-          14: "注销成功\n",
-          15: "登录成功\n",
+          14: "注销成功 Logout successfully\n",
+          15: "登录成功 Login successfully\n",
           'error0': "本 IP 不允许Web方式登录\n",
           'error1': "本帐号不允许Web方式登录\n",
           'error2': "本帐号不允许修改密码\n",
@@ -187,21 +187,24 @@ def getuserpass():
 
 def DispTFM(Msg, msga):
     if int(Msg) == 1:
-        if msga != "":
+        if msga != '':
             try:
                 sys.stdout.write(TFMMSG[msga])
             except KeyError:
-                sys.stdout.write(msga)
+                sys.stdout.write(msga + '\n')
+                return -1
         else:
             sys.stdout.write(LZUNET_FIND_STRS[11])
     else:
         sys.stdout.write(TFMMSG[int(Msg)])
+    return 0
 
 def process_ret(ret):
     msg = re.findall("Msg=([\d.]+);", ret)
-    msga = re.findall("msga='(.+)'", ret)
+    msga = re.findall("msga='(.*)'", ret)
     if msg != [] and msga != []:
-        DispTFM(msg[0], msga[0])
+        if DispTFM(msg[0], msga[0]) != 0:
+            return -1
     flow = re.findall("flow='([\d.]+)\s*'", ret)
     time = re.findall("time='([\d.]+)\s*'", ret)
     if flow != [] and time != []:
