@@ -78,6 +78,7 @@ LZUNET_MSGS = ('登录成功\t Login successfully.\n',
                '发生错误，请检查网络连接是否正常（网线没接好或者网络连接受限）\n',
                '本帐号已使用时间 : %d 分钟\n',
                '本帐号已使用流量 : %d.%d MByte\n',
+               
                )
 LZUNET_FIND_STRS = ('M)',
                 '帐号不存在',
@@ -93,8 +94,28 @@ LZUNET_FIND_STRS = ('M)',
                                  #Please don't forget to log out after you have finished.
                 '请您确认要注销',
                 '注销成功',
+                '帐号或密码不对，请重新输入',
+                '请输入您的帐号和密码',
+                '信息返回',
                 )
 
+TFMMSG = {0: '',
+          2: "该账号正在使用中，请您与网管联系 !!!\n",
+          3: "本帐号只能在指定地址使用\n",# :+pp+xip
+          4: "本帐号费用超支\n",
+          5: "本帐号暂停使用\n",
+          6: "System buffer full\n",
+          #7: UT+UF+UM,
+          8: "本帐号正在使用,不能修改\n",
+          9: "新密码与确认新密码不匹配,不能修改\n",
+          10: "密码修改成功\n",
+          11: "本帐号只能在指定地址使用\n", #:+pp+mac
+          14: "注销成功\n",
+          15: "登录成功\n",
+          'error0': "本 IP 不允许Web方式登录\n",
+          'error1': "本帐号不允许Web方式登录\n",
+          'error2': "本帐号不允许修改密码\n",
+}
 
 path0 = sys.path[0]
 if os.path.isdir(sys.path[0]):
@@ -114,6 +135,8 @@ if sys.version_info.major is 2:
     __doc__ = unicode(__doc__, 'utf-8').encode(SYS_ENCODING)
     LZUNET_MSGS = [unicode(i, 'utf-8').encode(SYS_ENCODING) for i in LZUNET_MSGS]
     LZUNET_FIND_STRS = [unicode(i, 'utf-8') for i in LZUNET_FIND_STRS]
+    for i in TFMMSG:
+        TFMMSG[i] = unicode(TFMMSG[i], 'utf-8')
 __doc__ = __doc__ % __version__
 
 
@@ -160,9 +183,27 @@ def getuserpass():
 #            f.write('%s %s' % userpass)
     return userpass
 
+
+
+def DispTFM(Msg, msga):
+    if int(Msg) == 1:
+        if msga != "":
+            try:
+                sys.stdout.write(TFMMSG[msga])
+            except KeyError:
+                sys.stdout.write(msga)
+        else:
+            sys.stdout.write(LZUNET_FIND_STRS[11])
+    else:
+        sys.stdout.write(TFMMSG[int(Msg)])
+
 def process_ret(ret):
-    flow = re.findall("flow='([\d.]+)\s+'", ret)
-    time = re.findall("time='([\d.]+)\s+'", ret)
+    msg = re.findall("Msg=([\d.]+);", ret)
+    msga = re.findall("msga='(.+)'", ret)
+    if msg != [] and msga != []:
+        DispTFM(msg[0], msga[0])
+    flow = re.findall("flow='([\d.]+)\s*'", ret)
+    time = re.findall("time='([\d.]+)\s*'", ret)
     if flow != [] and time != []:
         flow = int(flow[0])
         time = int(time[0])
@@ -203,12 +244,15 @@ q=0.9,*/*;q=0.8'), rf]
     if os.getenv('LNA_DEBUG'):
         sys.stdout.write(ret)
 
-
     if LZUNET_FIND_STRS[8] in ret or LZUNET_FIND_STRS[9] in ret:
         return float(0)
-    if LZUNET_FIND_STRS[10] in ret:
-        sys.stdout.write(LZUNET_MSGS[2])
+    if LZUNET_FIND_STRS[13] in ret:
         process_ret(ret)
+#    if LZUNET_FIND_STRS[10] in ret:
+#        ret1 = urlrequest.urlopen('http://10.10.0.202/').read().decode('gb2312')
+#        if LZUNET_FIND_STRS[12] in ret1:
+#            sys.stdout.write(LZUNET_MSGS[2])
+#            process_ret(ret)
     if LZUNET_FIND_STRS[0] in ret:
         usertime = re.findall('''"usertime" value='(\d+)''', ret)
         if usertime != []:
