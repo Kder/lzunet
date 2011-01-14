@@ -76,8 +76,8 @@ LZUNET_MSGS = ('登录成功\t Login successfully.\n',
                '本机IP:\t\t ',
                '您可用流量为\t %.3f M\n',
                '发生错误，请检查网络连接是否正常（网线没接好或者网络连接受限）\n',
-               '本帐号已使用时间 : %d 分钟\n',
-               '本帐号已使用流量 : %d.%d MByte\n',
+               '本帐号已使用时间 : %d天 %d小时 %d分钟\n',
+               '本帐号已使用流量 : %dT %dG %.3fM Bytes\n',
                
                )
 LZUNET_FIND_STRS = ('M)',
@@ -205,11 +205,16 @@ def process_ret(ret):
     flow = re.findall("flow='([\d.]+)\s*'", ret)
     time = re.findall("time='([\d.]+)\s*'", ret)
     if flow != [] and time != []:
-        flow = int(flow[0])
+        flow = int(flow[0]) # unit is kbyte
         time = int(time[0])
-        flow0=flow % 1024; flow1=flow - flow0; flow0 = flow0 * 1000; flow0 = flow0 - flow0 % 1024
-        sys.stdout.write(LZUNET_MSGS[16] % time)
-        sys.stdout.write(LZUNET_MSGS[17] % (flow1/1024, flow0/1024))
+#        flow0=flow % 1024; flow1=flow - flow0; flow0 = flow0 * 1000; flow0 = flow0 - flow0 % 1024
+#        flow0 = (flow % 1024) * 1000 - ((flow % 1024) * 1000) % 1024
+#        flow_kb = flow - flow % 1024
+#        flow0mb = flow % 1024 / 1024.0
+        sys.stdout.write(LZUNET_MSGS[16] % (time/60/24, time/60%24, time%60))
+        sys.stdout.write(LZUNET_MSGS[17] % (flow/1073741824, 
+            flow%1073741824/1048576, flow/1024%1024+flow%1024/1024.0))
+#        sys.stdout.write(LZUNET_MSGS[17] % (flow1/1024, flow0/1024))
 
 def con_auth(ul, bd, rf, tu):
     cj = cookie.CookieJar()
