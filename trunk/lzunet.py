@@ -47,60 +47,60 @@ import sys
 import re
 import locale
 import random
+import time
 
 try:
     import configparser as cp
     import urllib.request as urlrequest
     import urllib.parse as urlparse
     import http.cookiejar as cookie
+    from urllib.error import URLError, HTTPError
 except:
     import ConfigParser as cp
     import urllib2 as urlrequest
     import urllib as urlparse
     import cookielib as cookie
+    from urllib2 import URLError, HTTPError
 
 
 LZUNET_MSGS = (
-   '登录成功\t Login successfully.\n',                                # 0
-   '帐号不存在\n',                                                    # 1
-   '已下线\t\t Logout successfully.\n',                               # 2
-   '用户名或密码错误 Username or password error.\n',                  # 3
+   '登录成功\t Login successfully.\n',                       # 0
+   '帐号不存在\n',                                           # 1
+   '已下线\t\t Logout successfully.\n',                      # 2
+   '用户名或密码错误 Username or password error.\n',         # 3
    '在线用户超出允许的范围：帐号已在别处登录，\
-   如果确认不是自己登录的，可以联系网络中心踢对方下线。\n',           # 4
-   '帐号欠费，测试期间可携带校园卡来网络中心办理。\n',                # 5
-   '服务不可用，请稍后再试\n',                                        # 6
-   '流量用完，可以在校内的网上转转，等下个月即可恢复。:(\n',          # 7
-   '操作完成\t OK.\n',                                                # 8
-   '发生错误，请稍后再试 Error occured. Please try again later.\n',   # 9
-   '\n请输入您的上网账号和密码\n',                                    # 10
-   '账号：',                                                          # 11
-   '密码：',                                                          # 12
-   '本机IP:\t\t ',                                                    # 13
-   '您可用流量为\t %.3f M\n',                                         # 14
-   '发生错误，请检查网络连接是否正常（网线没接好或网络连接受限）\n',  # 15
-   '本帐号已使用时间 : %d天 %d小时 %d分钟\n',                         # 16
-   '本帐号已使用流量 : %dT %dG %.3fM Bytes\n',                        # 17
+   如果确认不是自己登录的，可以联系网络中心踢对方下线。\n',  # 4
+   '帐号欠费，测试期间可携带校园卡来网络中心办理。\n',       # 5
+   '服务不可用，请稍后再试\n',                               # 6
+   '流量用完，可以在校内的网上转转，等下个月即可恢复。:(\n', # 7
+   '操作完成\t OK.\n',                                       # 8
+   '操作过快，服务器还没反应过来呢，请等会再试\n',           # 9
+   '\n请输入您的上网账号和密码\n',                           # 10
+   '账号：',                                                 # 11
+   '密码：',                                                 # 12
+   '本机IP:\t\t ',                                           # 13
+   '您可用流量为\t %.3f M\n',                                # 14
+   '网络连接错误（网线没接好或网络连接受限）\n',             # 15
+   '本帐号已使用时间 : %d天 %d小时 %d分钟\n',                # 16
+   '本帐号已使用流量 : %dT %dG %.3fM Bytes\n',               # 17
    )
 
 LZUNET_FIND_STRS = (
-    'M)',                                                       # 0
-    '帐号不存在',                                               # 1
-    '下线',                                                     # 2
-    '密码错误',                                                 # 3
-    '范围',                                                     # 4
-    '过期',                                                     # 5
-    '不可用',                                                   # 6
-    '限制',                                                     # 7
-    '您已经成功登录',                                           # 8
-     #You have successfully logged into our system.
-     #在完成工作后，请别忘记注销。
-     #Please don't forget to log out after you have finished.
-    '请您确认要注销',                                           # 9
-    '注销成功',                                                 # 10
-    '帐号或密码不对，请重新输入',                               # 11
-    '请输入您的帐号和密码',                                     # 12
-    '信息返回',                                                 # 13
-                )
+    'M)',                          # 0
+    '帐号不存在',                  # 1
+    '下线',                        # 2
+    '密码错误',                    # 3
+    '范围',                        # 4
+    '过期',                        # 5
+    '不可用',                      # 6
+    '限制',                        # 7
+    '您已经成功登录',              # 8
+    '请您确认要注销',              # 9
+    '注销成功',                    # 10
+    '帐号或密码不对，请重新输入',  # 11
+    '请输入您的帐号和密码',        # 12
+    '信息返回',                    # 13
+    )
 
 TFMMSG = {0: '',
           2: "该账号正在使用中，请您与网管联系 !!!\n",
@@ -141,7 +141,7 @@ if sys.version_info.major is 2:
                     for i in LZUNET_MSGS]
     LZUNET_FIND_STRS = [unicode(i, 'utf-8') for i in LZUNET_FIND_STRS]
     for i in TFMMSG:
-        TFMMSG[i] = unicode(TFMMSG[i], 'utf-8')
+        TFMMSG[i] = unicode(TFMMSG[i], 'utf-8').encode(SYS_ENCODING)
 __doc__ = __doc__ % __version__
 
 
@@ -248,7 +248,7 @@ text/plain;q=0.8,image/png,*/*;q=0.5'),
         ('Accept-Language', 'zh-cn,zh;q=0.5'),
         ('Accept-Encoding', 'gzip,deflate'),
         ('Accept-Charset', 'GB2312,utf-8;q=0.7,*;q=0.7'),
-        
+
          rf]
     else:
         op.addheaders = [('User-Agent', 'Mozilla/5.0 (X11; U; Linux i686;\
@@ -269,18 +269,23 @@ q=0.9,*/*;q=0.8'), rf]
 #    print(encoded_bd)
     try:
         u = urlrequest.urlopen(req)
-    except:
+    except URLError:
         sys.stdout.write(LZUNET_MSGS[15])
         sys.exit(15)
     ret = u.read().decode('gbk')
     if os.getenv('LNA_DEBUG'):
-        sys.stdout.write(ret)
+        sys.stdout.write(ret.encode(SYS_ENCODING))
 
     if LZUNET_FIND_STRS[8] in ret:
-        return urlrequest.urlopen('http://10.10.0.202/').read().decode('gbk')
+        time.sleep(1)
+        try:
+            return urlrequest.urlopen('http://10.10.0.210/').read().decode('gbk')
+        except URLError:
+            sys.stdout.write(LZUNET_MSGS[15])
+            sys.exit(15)
     if LZUNET_FIND_STRS[13] in ret:
         return ret
-    
+
     return 0
     # for old version auth system
     if LZUNET_FIND_STRS[0] in ret:
@@ -391,8 +396,8 @@ def get_ip():
 
 
 def login(userpass):
-    url = 'http://10.10.0.202/'
-    referer = ('Referer', 'http://10.10.0.202/')
+    url = 'http://10.10.0.210/'
+    referer = ('Referer', 'http://10.10.0.210/')
     body = (('DDDDD', userpass[0]),
             ('upass', userpass[1]),
             ('0MKKey', '登录 Login'),
@@ -421,7 +426,7 @@ def login(userpass):
             # test_ret = urlrequest.urlopen(test_url).read()
             # if 'baidu' in str(test_ret):
                 # sys.stdout.write(LZUNET_MSGS[0])
-                
+
 #                sys.stdout.write(LZUNET_MSGS[14] % ret_code)
 #                sys.stdout.write(LZUNET_MSGS[8])
                 # break
@@ -431,8 +436,10 @@ def login(userpass):
         # pass
         if LZUNET_FIND_STRS[9] in ret:
             sys.stdout.write(TFMMSG[15])
-        pr = process_ret(str(ret))
-        sys.stdout.write(pr)
+        # print
+        # pr = process_ret(str(ret))
+        pr = process_ret(ret)
+        sys.stdout.write(pr)  # .encode(SYS_ENCODING)
         if pr == TFMMSG['error_userpass']:
             return 1
         return 0
@@ -456,12 +463,12 @@ def logout():
             # ('imageField.x', x),
             # ('imageField.y', y)
             # )
-    url = 'http://10.10.0.202/F.htm'
-#    referer = ('Referer', 'http://10.10.0.202/')
-    referer = ('Referer', 'http://10.10.0.202:9002/0')
+    url = 'http://10.10.0.210/F.htm'
+#    referer = ('Referer', 'http://10.10.0.210/')
+    referer = ('Referer', 'http://10.10.0.210:9002/0')
     body = None
     ret = con_auth(url, body, referer, test_url)
-    pr = process_ret(str(ret))
+    pr = process_ret(ret)
     sys.stdout.write(pr)
     if LZUNET_FIND_STRS[10] in ret:
         return 2
@@ -505,10 +512,10 @@ if __name__ == '__main__':
     if isPy2:
         ip = unicode(ip, 'utf-8').encode(SYS_ENCODING)
     test_url = 'http://baidu.com/'
-    # main()
+    main()
     try:
-        main()
-        # pass
+        # main()
+        pass
     except Exception:  # as e:
         sys.stdout.write(LZUNET_MSGS[9])
 #        sys.stdout.write(str(e))
