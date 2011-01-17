@@ -59,7 +59,8 @@ setup(name = "lzunet",
                 },
 )
 try:
-    os.remove('./lzunet.exe')
+    if os.path.exists('./lzunet.exe'):
+        os.remove('./lzunet.exe')
     shutil.move('dist/lzunet.exe', '.')
     os.system('upx lzunet.exe')
     os.system(u'7z a lzunet-%s.%s-win.7z lzunet.exe lzunet.ini 登录.bat 下线.bat'.encode(fenc) % (lzunet.__version__, rev))
