@@ -13,8 +13,8 @@ lzunet %s by Kder < http://www.kder.info >
         下线：下线.bat 或 logout.sh
 
     如果提示信息无法显示（例如在Linux终端下中文可能会乱码），可手动把lzunet.ini
-    中的 test@lzu.cn testpassword 替换为你的邮箱和上网认证密码，保存，然后再运行
-    上述对应的文件。
+    中的userid和password等号后的test分别替换为你上网认证的账号和密码，
+    保存，然后再运行上述对应的文件。
 
 其他用法【不建议】：
     直接使用lzunet.py，命令格式为：
@@ -64,7 +64,7 @@ LZUNET_MSGS = (
    '登录成功\t Login successfully.\n',                                # 0
    '帐号不存在\n',                                                    # 1
    '已下线\t\t Logout successfully.\n',                               # 2
-   '用户名或密码错误 Username or Password error.\n',                  # 3
+   '用户名或密码错误 Username or password error.\n',                  # 3
    '在线用户超出允许的范围：帐号已在别处登录，\
    如果确认不是自己登录的，可以联系网络中心踢对方下线。\n',           # 4
    '帐号欠费，测试期间可携带校园卡来网络中心办理。\n',                # 5
@@ -113,11 +113,12 @@ TFMMSG = {0: '',
           9: "新密码与确认新密码不匹配,不能修改\n",
           10: "密码修改成功\n",
           11: "本帐号只能在指定地址使用\n",  # :+pp+mac
-          14: "注销成功 Logout successfully\n",
-          15: "登录成功 Login successfully\n",
+          14: "注销成功 Logout OK\n",
+          15: "登录成功 Login OK\n",
           'error0': "本 IP 不允许Web方式登录\n",
           'error1': "本帐号不允许Web方式登录\n",
           'error2': "本帐号不允许修改密码\n",
+          'error_userpass': '帐号或密码不对，请重新输入\n',
 }
 
 path0 = sys.path[0]
@@ -148,8 +149,8 @@ def loadconf():
     userpass, usertime = 8, 3146400
     try:
         if config.read(CONF) != []:
-            userpass = (config.get('UserPass', 'UserID'),
-                        config.get('UserPass', 'Password'))
+            userpass = (config.get('UserPass', 'userid'),
+                        config.get('UserPass', 'password'))
             usertime = config.get('AuthInfo', 'usertime')
         else:
             createconf()
@@ -170,8 +171,8 @@ def saveconf():
 
 def createconf():
     config.add_section('UserPass')
-    config.set('UserPass', 'UserID', 'test@lzu.cn')
-    config.set('UserPass', 'Password', 'testpassword')
+    config.set('UserPass', 'userid', 'test@lzu.cn')
+    config.set('UserPass', 'password', 'testpassword')
     config.add_section('AuthInfo')
     config.set('AuthInfo', 'usertime', '3146400')
     saveconf()
@@ -183,8 +184,8 @@ def getuserpass():
     passwd = input(LZUNET_MSGS[12])
     userpass = (userid, passwd)
     if '' not in userpass:
-        config.set('UserPass', 'UserID', userid)
-        config.set('UserPass', 'Password', passwd)
+        config.set('UserPass', 'userid', userid)
+        config.set('UserPass', 'password', passwd)
         saveconf()
 #        with open(CONF,'w') as f:
 #            f.write('%s %s' % userpass)
@@ -195,42 +196,40 @@ def DispTFM(Msg, msga):
     if int(Msg) == 1:
         if msga != '':
             try:
-                sys.stdout.write(TFMMSG[msga])
+                return(TFMMSG[msga])
             except KeyError:
-                sys.stdout.write(msga + '\n')
-                return -1
+                return(msga + '\n')
         else:
-            sys.stdout.write(LZUNET_FIND_STRS[11])
+            return(TFMMSG['error_userpass'])
     else:
-        sys.stdout.write(TFMMSG[int(Msg)])
-    return 0
+        return(TFMMSG[int(Msg)])
 
 
 def process_ret(ret):
     msg = re.findall("Msg=([\d.]+);", ret)
     msga = re.findall("msga='(.*)'", ret)
+    # print msg,msga,ret
+    msg1 = ''
     if msg != [] and msga != []:
-        if DispTFM(msg[0], msga[0]) != 0:
-            return -1
+        msg1 = DispTFM(msg[0], msga[0])
+        if msg1 == TFMMSG['error_userpass']:
+            return msg1
     flow = re.findall("flow='([\d.]+)\s*'", ret)
     time = re.findall("time='([\d.]+)\s*'", ret)
     if flow != [] and time != []:
         time = int(time[0])  # unit is minute
         flow = int(flow[0])  # unit is kbyte
-#        flow0=flow % 1024; flow1=flow - flow0; flow0 = flow0 * 1000;
-#        flow0 = flow0 - flow0 % 1024
-#        flow0 = (flow % 1024) * 1000 - ((flow % 1024) * 1000) % 1024
-#        flow_kb = flow - flow % 1024
-#        flow0mb = flow % 1024 / 1024.0
         days = time / 60 / 24
         hours = time / 60 % 24
         minutes = time % 60
         flow_tb = flow / 1073741824
         flow_gb = flow % 1073741824 / 1048576
         flow_mb = flow / 1024 % 1024 + flow % 1024 / 1024.0
-        sys.stdout.write(LZUNET_MSGS[16] % (days, hours, minutes))
-        sys.stdout.write(LZUNET_MSGS[17] % (flow_tb, flow_gb, flow_mb))
-#        sys.stdout.write(LZUNET_MSGS[17] % (flow1/1024, flow0/1024))
+        time_flow = LZUNET_MSGS[16] % (days, hours, minutes) \
+         + LZUNET_MSGS[17] % (flow_tb, flow_gb, flow_mb)
+    else:
+        time_flow = ''
+    return msg1 + time_flow
 
 
 def con_auth(ul, bd, rf, tu):
@@ -268,11 +267,8 @@ q=0.9,*/*;q=0.8'), rf]
     else:
         req = ul
 #    print(encoded_bd)
-    u = urlrequest.urlopen(req)
     try:
-        pass
-#        sys.exit()
-#        u = urlrequest.urlopen(req)
+        u = urlrequest.urlopen(req)
     except:
         sys.stdout.write(LZUNET_MSGS[15])
         sys.exit(15)
@@ -280,13 +276,13 @@ q=0.9,*/*;q=0.8'), rf]
     if os.getenv('LNA_DEBUG'):
         sys.stdout.write(ret)
 
-    if LZUNET_FIND_STRS[8] in ret or LZUNET_FIND_STRS[9] in ret:
+    if LZUNET_FIND_STRS[8] in ret:
         return urlrequest.urlopen('http://10.10.0.202/').read().decode('gbk')
-    #    print(str(ret))
-        
-#        return float(0)
     if LZUNET_FIND_STRS[13] in ret:
-        process_ret(ret)
+        return ret
+    
+    return 0
+    # for old version auth system
     if LZUNET_FIND_STRS[0] in ret:
         usertime = re.findall('''"usertime" value='(\d+)''', ret)
         if usertime != []:
@@ -421,17 +417,27 @@ def login(userpass):
 #&wlanacname=BAS_138' % ip)
     ret = con_auth(url, body, referer, test_url)
     if not isinstance(ret, int):
-        for i in range(3):
-            test_ret = urlrequest.urlopen(test_url).read()
-            if 'baidu' in str(test_ret):
+        # for i in range(3):
+            # test_ret = urlrequest.urlopen(test_url).read()
+            # if 'baidu' in str(test_ret):
+                # sys.stdout.write(LZUNET_MSGS[0])
+                
 #                sys.stdout.write(LZUNET_MSGS[14] % ret_code)
-                sys.stdout.write(LZUNET_MSGS[0])
 #                sys.stdout.write(LZUNET_MSGS[8])
-                break
-        else:
-            pass
+                # break
+        # else:
+            # pass
 #            login(userpass)
-        return process_ret(ret)
+        # pass
+        if LZUNET_FIND_STRS[9] in ret:
+            sys.stdout.write(TFMMSG[15])
+        pr = process_ret(str(ret))
+        sys.stdout.write(pr)
+        if pr == TFMMSG['error_userpass']:
+            return 1
+        return 0
+    else:
+        return ret
 
 
 def logout():
@@ -454,8 +460,11 @@ def logout():
 #    referer = ('Referer', 'http://10.10.0.202/')
     referer = ('Referer', 'http://10.10.0.202:9002/0')
     body = None
-    ret_code = con_auth(url, body, referer, test_url)
-    return ret_code
+    ret = con_auth(url, body, referer, test_url)
+    pr = process_ret(str(ret))
+    sys.stdout.write(pr)
+    if LZUNET_FIND_STRS[10] in ret:
+        return 2
 
 
 def main():
@@ -480,12 +489,14 @@ def main():
 
     if userpass:
         ret_code = login(userpass)
-
-    if ret_code is 2:
-        sys.stdout.write(LZUNET_MSGS[8])
-    else:
-        while (ret_code is 3) or (ret_code is 1):
-            ret_code = login(getuserpass())
+        # print(ret_code)
+    # if ret_code is 0:
+        # sys.stdout.write(LZUNET_MSGS[0])
+    # if ret_code is 2:
+        # sys.stdout.write(LZUNET_MSGS[8])
+    # else:
+    while (ret_code is 3) or (ret_code is 1):
+        ret_code = login(getuserpass())
     return ret_code
 
 
@@ -494,10 +505,10 @@ if __name__ == '__main__':
     if isPy2:
         ip = unicode(ip, 'utf-8').encode(SYS_ENCODING)
     test_url = 'http://baidu.com/'
-#    main()
+    # main()
     try:
         main()
-        pass
+        # pass
     except Exception:  # as e:
         sys.stdout.write(LZUNET_MSGS[9])
 #        sys.stdout.write(str(e))
