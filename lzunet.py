@@ -47,7 +47,6 @@ import sys
 import re
 import locale
 import random
-import time
 import traceback
 try:
     import configparser as cp
