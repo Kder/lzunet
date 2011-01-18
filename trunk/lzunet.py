@@ -48,19 +48,19 @@ import re
 import locale
 import random
 import time
-
+import traceback
 try:
     import configparser as cp
     import urllib.request as urlrequest
     import urllib.parse as urlparse
     import http.cookiejar as cookie
-    from urllib.error import URLError, HTTPError
+    # from urllib.error import URLError, HTTPError
 except:
     import ConfigParser as cp
     import urllib2 as urlrequest
     import urllib as urlparse
     import cookielib as cookie
-    from urllib2 import URLError, HTTPError
+    # from urllib2 import URLError, HTTPError
 
 
 LZUNET_MSGS = (
@@ -266,27 +266,32 @@ q=0.9,*/*;q=0.8'), rf]
         req = urlrequest.Request(ul, encoded_bd)
     else:
         req = ul
-#    print(encoded_bd)
+    ret = ''
     try:
-        u = urlrequest.urlopen(req)
-    except URLError:
-        sys.stdout.write(LZUNET_MSGS[15])
-        sys.exit(15)
-    ret = u.read().decode('gbk')
+        ret = urlrequest.urlopen(req).read().decode('gbk')
+    except:
+        exctype, value = sys.exc_info()[:2]
+        exception = traceback.format_exception_only(exctype, value)
+        # print(exception[0])
+        if '10054' in exception[0]:
+            # print('Reset')
+            sys.stdout.write(LZUNET_MSGS[9])
+        if '10060' in exception[0] or '10065' in exception[0] or \
+                '11001' in exception[0]:
+            sys.stdout.write(LZUNET_MSGS[15])
+            # print('Timeout')
+        # if '10065' in exception[0]:
+            # print('Not Connected')
+        # if '11001' in exception[0]:
+            # print('getaddress failed')
+        sys.exit(9)
     if os.getenv('LNA_DEBUG'):
         sys.stdout.write(ret.encode(SYS_ENCODING))
+    return ret
+    # if LZUNET_FIND_STRS[13] in ret:
+        # return ret
 
-    if LZUNET_FIND_STRS[8] in ret:
-        time.sleep(1)
-        try:
-            return urlrequest.urlopen('http://10.10.0.210/').read().decode('gbk')
-        except URLError:
-            sys.stdout.write(LZUNET_MSGS[15])
-            sys.exit(15)
-    if LZUNET_FIND_STRS[13] in ret:
-        return ret
-
-    return 0
+    # return 0
     # for old version auth system
     if LZUNET_FIND_STRS[0] in ret:
         usertime = re.findall('''"usertime" value='(\d+)''', ret)
@@ -434,8 +439,9 @@ def login(userpass):
             # pass
 #            login(userpass)
         # pass
-        if LZUNET_FIND_STRS[9] in ret:
+        if LZUNET_FIND_STRS[8] in ret:
             sys.stdout.write(TFMMSG[15])
+            ret = con_auth(url, None, referer, test_url)
         # print
         # pr = process_ret(str(ret))
         pr = process_ret(ret)
@@ -512,9 +518,9 @@ if __name__ == '__main__':
     if isPy2:
         ip = unicode(ip, 'utf-8').encode(SYS_ENCODING)
     test_url = 'http://baidu.com/'
-    main()
+    # main()
     try:
-        # main()
+        main()
         pass
     except Exception:  # as e:
         sys.stdout.write(LZUNET_MSGS[9])
