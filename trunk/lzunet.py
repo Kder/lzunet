@@ -132,9 +132,9 @@ CONF = PROGRAM_PATH + os.sep + 'lzunet.ini'
 config = cp.RawConfigParser()
 
 SYS_ENCODING = locale.getdefaultlocale()[1]
-isPy2 = False
+ispy2 = False
 if sys.version_info.major is 2:
-    isPy2 = True
+    ispy2 = True
     input = raw_input
     __doc__ = unicode(__doc__, 'utf-8').encode(SYS_ENCODING)
     LZUNET_MSGS = [unicode(i, 'utf-8').encode(SYS_ENCODING) \
@@ -192,7 +192,7 @@ def getuserpass():
     return userpass
 
 
-def DispTFM(Msg, msga):
+def tfm(Msg, msga):
     if int(Msg) == 1:
         if msga != '':
             try:
@@ -211,7 +211,7 @@ def process_ret(ret):
     # print msg,msga,ret
     msg1 = ''
     if msg != [] and msga != []:
-        msg1 = DispTFM(msg[0], msga[0])
+        msg1 = tfm(msg[0], msga[0])
         if msg1 == TFMMSG['error_userpass']:
             return msg1
     flow = re.findall("flow='([\d.]+)\s*'", ret)
@@ -315,7 +315,7 @@ q=0.9,*/*;q=0.8'), rf]
 # http://hi.baidu.com/yangyingchao/blog/item/8d26b544f6059f45500ffe78.html
 
 # for Linux
-def get_ip_address(ifname):
+def get_ip_lin(ifname):
     import socket
     import fcntl
     import struct
@@ -325,12 +325,12 @@ def get_ip_address(ifname):
         0x8915,  # SIOCGIFADDR
         struct.pack('256s', ifname[:15]))[20:24])
 
-#get_ip_address('lo')
-#get_ip_address('eth0')
+#get_ip_lin('lo')
+#get_ip_lin('eth0')
 
 
 # for Windows
-def getIPAddresses():
+def get_ip_win():
     from ctypes import Structure, windll, sizeof
     from ctypes import POINTER, byref
     from ctypes import c_ulong, c_uint, c_ubyte, c_char
@@ -379,7 +379,7 @@ def getIPAddresses():
     if rc == 0:
         for a in adapterList:
             adNode = a.ipAddressList
-            if isPy2:
+            if ispy2:
                 while True:
                     ipAddr = adNode.ipAddress
                     if ipAddr:
@@ -395,9 +395,9 @@ def getIPAddresses():
 
 def get_ip():
     if sys.platform == 'win32':
-        return [x for x in getIPAddresses()]
+        return [x for x in get_ip_win()]
     else:
-        return [get_ip_address('eth0')]
+        return [get_ip_lin('eth0')]
 
 
 def login(userpass):
@@ -515,7 +515,7 @@ def main():
 
 if __name__ == '__main__':
     ip = get_ip()[0]
-    if isPy2:
+    if ispy2:
         ip = unicode(ip, 'utf-8').encode(SYS_ENCODING)
     test_url = 'http://baidu.com/'
     # main()
