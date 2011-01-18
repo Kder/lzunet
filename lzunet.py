@@ -231,40 +231,37 @@ def process_ret(ret):
     return msg1 + time_flow
 
 
-def con_auth(ul, bd, rf, tu):
+def conn_auth(url, body, referer):
     cj = cookie.CookieJar()
     cookie_handler = urlrequest.HTTPCookieProcessor(cj)
     proxy_handler = urlrequest.ProxyHandler(proxies={})
     op = urlrequest.build_opener(cookie_handler, proxy_handler)
-    if sys.platform == 'win32':
-        op.addheaders = [
+    headers = [
         ('User-Agent', 'Mozilla/5.0 (Windows; U; Windows NT 5.1; \
 zh-CN; rv:1.9.2.13) Gecko/20101203 Firefox/3.6.13'),
-        ('Accept', 'application/xml,application/xhtml+xml,text/html;q=0.9,\
-text/plain;q=0.8,image/png,*/*;q=0.5'),
+        ('Accept', 'text/html,application/xhtml+xml,application/xml;\
+q=0.9,*/*;q=0.8'),
         ('Keep-Alive', '115'),
         ('Connection', 'keep-alive'),
         ('Accept-Language', 'zh-cn,zh;q=0.5'),
         ('Accept-Encoding', 'gzip,deflate'),
         ('Accept-Charset', 'GB2312,utf-8;q=0.7,*;q=0.7'),
-
-         rf]
-    else:
-        op.addheaders = [('User-Agent', 'Mozilla/5.0 (X11; U; Linux i686;\
- en-US; rv:1.9.2.10) Gecko/20100916 Firefox/3.6.10'),
-        ('Accept', 'text/html,application/xhtml+xml,application/xml;\
-q=0.9,*/*;q=0.8'), rf]
-
+         referer
+    ]
+    if sys.platform != 'win32':
+        headers[0] = ('User-Agent', 'Mozilla/5.0 (X11; U; Linux i686;\
+ en-US; rv:1.9.2.10) Gecko/20100916 Firefox/3.6.10')
+    op.addheaders = headers
     urlrequest.install_opener(op)
-    if bd:
+    if body:
         try:
-            encoded_bd = bytes(urlparse.urlencode(bd, encoding='gbk'),
+            encoded_body = bytes(urlparse.urlencode(body, encoding='gbk'),
                 'gbk')
         except:
-            encoded_bd = urlparse.urlencode(bd)
-        req = urlrequest.Request(ul, encoded_bd)
+            encoded_body = urlparse.urlencode(body)
+        req = urlrequest.Request(url, encoded_body)
     else:
-        req = ul
+        req = url
     ret = ''
     try:
         ret = urlrequest.urlopen(req).read().decode('gbk')
@@ -424,7 +421,7 @@ def login(userpass):
     # referer = ('Referer',
     # 'http://202.201.1.140/portalReceiveAction.do?wlanuserip=%s\
 #&wlanacname=BAS_138' % ip)
-    ret = con_auth(url, body, referer, test_url)
+    ret = conn_auth(url, body, referer)
     if not isinstance(ret, int):
         # for i in range(3):
             # test_ret = urlrequest.urlopen(test_url).read()
@@ -440,7 +437,7 @@ def login(userpass):
         # pass
         if LZUNET_FIND_STRS[8] in ret:
             sys.stdout.write(TFMMSG[15])
-            ret = con_auth(url, None, referer, test_url)
+            ret = conn_auth(url, None, referer)
         # print
         # pr = process_ret(str(ret))
         pr = process_ret(ret)
@@ -472,7 +469,7 @@ def logout():
 #    referer = ('Referer', 'http://10.10.0.210/')
     referer = ('Referer', 'http://10.10.0.210:9002/0')
     body = None
-    ret = con_auth(url, body, referer, test_url)
+    ret = conn_auth(url, body, referer)
     pr = process_ret(ret)
     sys.stdout.write(pr)
     if LZUNET_FIND_STRS[10] in ret:
@@ -516,7 +513,7 @@ if __name__ == '__main__':
     ip = get_ip()[0]
     if ispy2:
         ip = unicode(ip, 'utf-8').encode(SYS_ENCODING)
-    test_url = 'http://baidu.com/'
+    # test_url = 'http://baidu.com/'
     # main()
     try:
         main()
