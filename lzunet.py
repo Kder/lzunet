@@ -246,7 +246,7 @@ q=0.9,*/*;q=0.8'),
         ('Accept-Language', 'zh-cn,zh;q=0.5'),
         ('Accept-Encoding', 'gzip,deflate'),
         ('Accept-Charset', 'GB2312,utf-8;q=0.7,*;q=0.7'),
-         referer
+        ('Referer', referer)
     ]
     if sys.platform != 'win32':
         headers[0] = ('User-Agent', 'Mozilla/5.0 (X11; U; Linux i686;\
@@ -261,10 +261,12 @@ q=0.9,*/*;q=0.8'),
             encoded_body = urlparse.urlencode(body)
         req = urlrequest.Request(url, encoded_body)
     else:
-        req = url
+        req = urlrequest.Request(url)
     ret = ''
+    # ret = urlrequest.urlopen(req).read()
     try:
-        ret = urlrequest.urlopen(req).read().decode('gbk')
+        # pass
+        ret = urlrequest.urlopen(req).read()
     except:
         exctype, value = sys.exc_info()[:2]
         exception = traceback.format_exception_only(exctype, value)
@@ -284,26 +286,23 @@ q=0.9,*/*;q=0.8'),
     if os.getenv('LNA_DEBUG'):
         sys.stdout.write(ret.encode(SYS_ENCODING))
     return ret
-    # if LZUNET_FIND_STRS[13] in ret:
-        # return ret
 
-    # return 0
     # for old version auth system
-    if LZUNET_FIND_STRS[0] in ret:
-        usertime = re.findall('''"usertime" value='(\d+)''', ret)
-        if usertime != []:
-            usertime = usertime[0]
-            config.set('AuthInfo', 'usertime', usertime)
-            saveconf()
-        flow_available = re.findall('([\d.]+) M', ret)
-        if flow_available != []:
-            flow_available = float([0])
-            return flow_available
-    else:
-        for i in range(1, 8):
-            if LZUNET_FIND_STRS[i] in ret:
-                sys.stdout.write(LZUNET_MSGS[i])
-                return i
+    # if LZUNET_FIND_STRS[0] in ret:
+        # usertime = re.findall('''"usertime" value='(\d+)''', ret)
+        # if usertime != []:
+            # usertime = usertime[0]
+            # config.set('AuthInfo', 'usertime', usertime)
+            # saveconf()
+        # flow_available = re.findall('([\d.]+) M', ret)
+        # if flow_available != []:
+            # flow_available = float([0])
+            # return flow_available
+    # else:
+        # for i in range(1, 8):
+            # if LZUNET_FIND_STRS[i] in ret:
+                # sys.stdout.write(LZUNET_MSGS[i])
+                # return i
 
 
 # Get the IP address of local machine
@@ -398,7 +397,7 @@ def get_ip():
 
 def login(userpass):
     url = 'http://10.10.0.210/'
-    referer = ('Referer', 'http://10.10.0.210/')
+    referer = url
     body = (('DDDDD', userpass[0]),
             ('upass', userpass[1]),
             ('0MKKey', '登录 Login'),
@@ -418,10 +417,9 @@ def login(userpass):
     # ('seq_id', ''),
     # ('req_id', ''),
     # )
-    # referer = ('Referer',
-    # 'http://202.201.1.140/portalReceiveAction.do?wlanuserip=%s\
-#&wlanacname=BAS_138' % ip)
-    ret = conn_auth(url, body, referer)
+    # referer = 'http://202.201.1.140/portalReceiveAction.do?wlanuserip=%s\
+#&wlanacname=BAS_138' % ip
+    ret = conn_auth(url, body, referer).decode('gbk')
     if not isinstance(ret, int):
         # for i in range(3):
             # test_ret = urlrequest.urlopen(test_url).read()
@@ -432,14 +430,10 @@ def login(userpass):
 #                sys.stdout.write(LZUNET_MSGS[8])
                 # break
         # else:
-            # pass
 #            login(userpass)
-        # pass
         if LZUNET_FIND_STRS[8] in ret:
             sys.stdout.write(TFMMSG[15])
-            ret = conn_auth(url, None, referer)
-        # print
-        # pr = process_ret(str(ret))
+            ret = conn_auth(url, None, referer).decode('gbk')
         pr = process_ret(ret)
         sys.stdout.write(pr)  # .encode(SYS_ENCODING)
         if pr == TFMMSG['error_userpass']:
@@ -455,8 +449,7 @@ def logout():
 #    x = random.randrange(0,180)
 #    y = random.randrange(0,50)
     # url = 'http://202.201.1.140/portalDisconnAction.do'
-    # referer = ('Referer',
-               # 'http://202.201.1.140/portalAuthAction.do')
+    # referer = 'http://202.201.1.140/portalAuthAction.do'
     # body = (('wlanuserip', ip),
             # ('wlanacname', 'BAS_138'),
             # ('wlanacIp','202.201.1.138'),
@@ -466,10 +459,10 @@ def logout():
             # ('imageField.y', y)
             # )
     url = 'http://10.10.0.210/F.htm'
-#    referer = ('Referer', 'http://10.10.0.210/')
-    referer = ('Referer', 'http://10.10.0.210:9002/0')
+#    referer = 'http://10.10.0.210/'
+    referer = 'http://10.10.0.210:9002/0'
     body = None
-    ret = conn_auth(url, body, referer)
+    ret = conn_auth(url, body, referer).decode('gbk')
     pr = process_ret(ret)
     sys.stdout.write(pr)
     if LZUNET_FIND_STRS[10] in ret:
