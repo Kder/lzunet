@@ -36,7 +36,7 @@ __license__ = 'GNU General Public License v3'
 __status__ = 'Release'
 __projecturl__ = 'http://code.google.com/p/lzunet/'
 
-__version__ = '1.3.3'
+__version__ = '1.4.0'
 __revision__ = "$Revision$"
 __date__ = '$Date$'
 __author__ = '$Author$'
@@ -148,8 +148,8 @@ def loadconf():
     userpass, usertime = 8, 3146400
     try:
         if config.read(CONF) != []:
-            userpass = (config.get('UserPass', 'userid'),
-                        config.get('UserPass', 'password'))
+            userpass = (config.get('AuthInfo', 'userid'),
+                        config.get('AuthInfo', 'password'))
             usertime = config.get('AuthInfo', 'usertime')
         else:
             createconf()
@@ -169,10 +169,10 @@ def saveconf():
 
 
 def createconf():
-    config.add_section('UserPass')
-    config.set('UserPass', 'userid', 'test@lzu.cn')
-    config.set('UserPass', 'password', 'testpassword')
     config.add_section('AuthInfo')
+    config.set('AuthInfo', 'userid', 'test@lzu.cn')
+    config.set('AuthInfo', 'password', 'testpassword')
+    # config.add_section('AuthInfo')
     config.set('AuthInfo', 'usertime', '3146400')
     saveconf()
 
@@ -183,16 +183,16 @@ def getuserpass():
     passwd = input(LZUNET_MSGS[12])
     userpass = (userid, passwd)
     if '' not in userpass:
-        config.set('UserPass', 'userid', userid)
-        config.set('UserPass', 'password', passwd)
+        config.set('AuthInfo', 'userid', userid)
+        config.set('AuthInfo', 'password', passwd)
         saveconf()
 #        with open(CONF,'w') as f:
 #            f.write('%s %s' % userpass)
     return userpass
 
 
-def tfm(Msg, msga):
-    if int(Msg) == 1:
+def tfm(msg, msga):
+    if int(msg) == 1:
         if msga != '':
             try:
                 return(TFMMSG[msga])
@@ -201,7 +201,7 @@ def tfm(Msg, msga):
         else:
             return(TFMMSG['error_userpass'])
     else:
-        return(TFMMSG[int(Msg)])
+        return(TFMMSG[int(msg)])
 
 
 def process_ret(ret):
@@ -254,11 +254,12 @@ q=0.9,*/*;q=0.8'),
     op.addheaders = headers
     urlrequest.install_opener(op)
     if body:
-        try:
-            encoded_body = bytes(urlparse.urlencode(body, encoding='gbk'),
-                'gbk')
-        except:
-            encoded_body = urlparse.urlencode(body)
+        # try:
+            # encoded_body = bytes(urlparse.urlencode(body, encoding='gbk'),
+                # 'gbk')
+        # except:
+            # encoded_body = urlparse.urlencode(body)
+        encoded_body = body
         req = urlrequest.Request(url, encoded_body)
     else:
         req = urlrequest.Request(url)
@@ -270,7 +271,7 @@ q=0.9,*/*;q=0.8'),
     except:
         exctype, value = sys.exc_info()[:2]
         exception = traceback.format_exception_only(exctype, value)
-        # print(exception[0])
+        print(exception[0])
         if '10054' in exception[0]:
             # print('Reset')
             sys.stdout.write(LZUNET_MSGS[9])
@@ -396,13 +397,18 @@ def get_ip():
 
 
 def login(userpass):
-    url = 'http://10.10.0.210/'
-    referer = url
-    body = (('DDDDD', userpass[0]),
-            ('upass', userpass[1]),
-            ('0MKKey', '登录 Login'),
-            ('v6ip', ''),
-            )
+    config = cp.ConfigParser()
+    config.read(CONF)
+    url = config.get('AuthInfo','login_url')
+    referer = config.get('AuthInfo','login_referer')
+    body = config.get('AuthInfo','body1') + config.get('AuthInfo','body2',1)
+    # url = 'http://10.10.0.210/'
+    # referer = url
+    # body = (('DDDDD', userpass[0]),
+            # ('upass', userpass[1]),
+            # ('0MKKey', '登录 Login'),
+            # ('v6ip', ''),
+            # )
 
     # url = 'http://202.201.1.140/portalAuthAction.do'
     # body = (
@@ -458,9 +464,13 @@ def logout():
             # ('imageField.x', x),
             # ('imageField.y', y)
             # )
-    url = 'http://10.10.0.210/F.htm'
+    # url = 'http://10.10.0.210/F.htm'
 #    referer = 'http://10.10.0.210/'
-    referer = 'http://10.10.0.210:9002/0'
+    # referer = 'http://10.10.0.210:9002/0'
+    config = cp.ConfigParser()
+    config.read(CONF)
+    url = config.get('AuthInfo','logout_url')
+    referer = config.get('AuthInfo','logout_referer')
     body = None
     ret = conn_auth(url, body, referer).decode('gbk')
     pr = process_ret(ret)
@@ -507,13 +517,13 @@ if __name__ == '__main__':
     if ispy2:
         ip = unicode(ip, 'utf-8').encode(SYS_ENCODING)
     # test_url = 'http://baidu.com/'
-    # main()
+    main()
     try:
-        main()
+        # main()
         pass
     except Exception:  # as e:
-        sys.stdout.write(LZUNET_MSGS[9])
-#        sys.stdout.write(str(e))
+        # sys.stdout.write(LZUNET_MSGS[9])
+       sys.stdout.write(str(e))
     #finally:
     #    input('''请按回车键退出 Press Return to quit...
 #'''.decode('utf-8').encode(fenc))
