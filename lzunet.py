@@ -153,13 +153,8 @@ def loadconf():
             usertime = config.get('AuthInfo', 'usertime')
         else:
             createconf()
-#        f = open(CONF)
-#        userpass = re.split('\s+', f.readline().strip(), maxsplit=1)
-#        f.close()
-#    except Exception as e:
     except:
         createconf()
-#        sys.stderr.write(str(e))
     return userpass, usertime
 
 
@@ -186,8 +181,6 @@ def getuserpass():
         config.set('AuthInfo', 'userid', userid)
         config.set('AuthInfo', 'password', passwd)
         saveconf()
-#        with open(CONF,'w') as f:
-#            f.write('%s %s' % userpass)
     return userpass
 
 
@@ -254,13 +247,7 @@ q=0.9,*/*;q=0.8'),
     op.addheaders = headers
     urlrequest.install_opener(op)
     if body:
-        # try:
-            # encoded_body = bytes(urlparse.urlencode(body, encoding='gbk'),
-                # 'gbk')
-        # except:
-            # encoded_body = urlparse.urlencode(body)
-        encoded_body = body
-        req = urlrequest.Request(url, encoded_body)
+        req = urlrequest.Request(url, body)
     else:
         req = urlrequest.Request(url)
     ret = ''
@@ -272,38 +259,17 @@ q=0.9,*/*;q=0.8'),
         exctype, value = sys.exc_info()[:2]
         exception = traceback.format_exception_only(exctype, value)
         print(exception[0])
+        # '10054':'Reset'
         if '10054' in exception[0]:
-            # print('Reset')
             sys.stdout.write(LZUNET_MSGS[9])
+        # '10060':'Timeout','10065':'Not Connected','11001':'getaddress failed'
         if '10060' in exception[0] or '10065' in exception[0] or \
                 '11001' in exception[0]:
             sys.stdout.write(LZUNET_MSGS[15])
-            # print('Timeout')
-        # if '10065' in exception[0]:
-            # print('Not Connected')
-        # if '11001' in exception[0]:
-            # print('getaddress failed')
         sys.exit(9)
     if os.getenv('LNA_DEBUG'):
         sys.stdout.write(ret.encode(SYS_ENCODING))
     return ret
-
-    # for old version auth system
-    # if LZUNET_FIND_STRS[0] in ret:
-        # usertime = re.findall('''"usertime" value='(\d+)''', ret)
-        # if usertime != []:
-            # usertime = usertime[0]
-            # config.set('AuthInfo', 'usertime', usertime)
-            # saveconf()
-        # flow_available = re.findall('([\d.]+) M', ret)
-        # if flow_available != []:
-            # flow_available = float([0])
-            # return flow_available
-    # else:
-        # for i in range(1, 8):
-            # if LZUNET_FIND_STRS[i] in ret:
-                # sys.stdout.write(LZUNET_MSGS[i])
-                # return i
 
 
 # Get the IP address of local machine
@@ -399,84 +365,33 @@ def get_ip():
 def login(userpass):
     config = cp.ConfigParser()
     config.read(CONF)
-    url = config.get('AuthInfo','login_url')
-    referer = config.get('AuthInfo','login_referer')
-    body = config.get('AuthInfo','body1') + config.get('AuthInfo','body2',1)
-    # url = 'http://10.10.0.210/'
-    # referer = url
-    # body = (('DDDDD', userpass[0]),
-            # ('upass', userpass[1]),
-            # ('0MKKey', '登录 Login'),
-            # ('v6ip', ''),
-            # )
-
-    # url = 'http://202.201.1.140/portalAuthAction.do'
-    # body = (
-    # ('userid', userpass[0]),
-    # ('passwd', userpass[1]),
-    # ('wlanuserip', ip),
-    # ('wlanacname', 'BAS_138'),
-    # ('auth_type', 'PAP'),
-    # ('wlanacIp', '202.201.1.138'),
-    # ('chal_id', ''),
-    # ('chal_vector', ''),
-    # ('seq_id', ''),
-    # ('req_id', ''),
-    # )
-    # referer = 'http://202.201.1.140/portalReceiveAction.do?wlanuserip=%s\
-#&wlanacname=BAS_138' % ip
+    url = config.get('AuthInfo', 'login_url')
+    referer = config.get('AuthInfo', 'login_referer')
+    body = config.get('AuthInfo',' body1') + config.get('AuthInfo', 'body2',1)
     ret = conn_auth(url, body, referer).decode('gbk')
-    if not isinstance(ret, int):
-        # for i in range(3):
-            # test_ret = urlrequest.urlopen(test_url).read()
-            # if 'baidu' in str(test_ret):
-                # sys.stdout.write(LZUNET_MSGS[0])
-
-#                sys.stdout.write(LZUNET_MSGS[14] % ret_code)
-#                sys.stdout.write(LZUNET_MSGS[8])
-                # break
-        # else:
-#            login(userpass)
-        if LZUNET_FIND_STRS[8] in ret:
-            sys.stdout.write(TFMMSG[15])
-            ret = conn_auth(url, None, referer).decode('gbk')
-        pr = process_ret(ret)
-        sys.stdout.write(pr)  # .encode(SYS_ENCODING)
-        if pr == TFMMSG['error_userpass']:
-            return 1
-        return 0
-    else:
-        return ret
+    if LZUNET_FIND_STRS[8] in ret:
+        sys.stdout.write(TFMMSG[15])
+        ret = conn_auth(url, None, referer).decode('gbk')
+    pr = process_ret(ret)
+    sys.stdout.write(pr)  # .encode(SYS_ENCODING)
+    if pr == TFMMSG['error_userpass']:
+        return 1
+    return 0
 
 
 def logout():
-#    usertime = loadconf()[1]
-    # x <- (0,180) y <- (0,50)
-#    x = random.randrange(0,180)
-#    y = random.randrange(0,50)
-    # url = 'http://202.201.1.140/portalDisconnAction.do'
-    # referer = 'http://202.201.1.140/portalAuthAction.do'
-    # body = (('wlanuserip', ip),
-            # ('wlanacname', 'BAS_138'),
-            # ('wlanacIp','202.201.1.138'),
-            # ('portalUrl', ''),
-            # ('usertime', usertime),
-            # ('imageField.x', x),
-            # ('imageField.y', y)
-            # )
-    # url = 'http://10.10.0.210/F.htm'
-#    referer = 'http://10.10.0.210/'
-    # referer = 'http://10.10.0.210:9002/0'
     config = cp.ConfigParser()
     config.read(CONF)
-    url = config.get('AuthInfo','logout_url')
-    referer = config.get('AuthInfo','logout_referer')
+    url = config.get('AuthInfo', 'logout_url')
+    referer = config.get('AuthInfo', 'logout_referer')
     body = None
     ret = conn_auth(url, body, referer).decode('gbk')
     pr = process_ret(ret)
     sys.stdout.write(pr)
-    if LZUNET_FIND_STRS[10] in ret:
-        return 2
+    if LZUNET_FIND_STRS[10] in pr:
+        return 0
+    else:
+        return 3
 
 
 def main():
@@ -498,15 +413,8 @@ def main():
     else:
         sys.stdout.write(__doc__)
         sys.exit(3)
-
     if userpass:
         ret_code = login(userpass)
-        # print(ret_code)
-    # if ret_code is 0:
-        # sys.stdout.write(LZUNET_MSGS[0])
-    # if ret_code is 2:
-        # sys.stdout.write(LZUNET_MSGS[8])
-    # else:
     while (ret_code is 3) or (ret_code is 1):
         ret_code = login(getuserpass())
     return ret_code
@@ -516,7 +424,6 @@ if __name__ == '__main__':
     ip = get_ip()[0]
     if ispy2:
         ip = unicode(ip, 'utf-8').encode(SYS_ENCODING)
-    # test_url = 'http://baidu.com/'
     main()
     try:
         # main()
@@ -524,9 +431,6 @@ if __name__ == '__main__':
     except Exception:  # as e:
         # sys.stdout.write(LZUNET_MSGS[9])
        sys.stdout.write(str(e))
-    #finally:
-    #    input('''请按回车键退出 Press Return to quit...
-#'''.decode('utf-8').encode(fenc))
 
 
 #vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
