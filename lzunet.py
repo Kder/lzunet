@@ -82,6 +82,7 @@ LZUNET_MSGS = (
    '网络连接错误（网线没接好或网络连接受限）\n',             # 15
    '本帐号已使用时间 : %d天 %d小时 %d分钟\n',                # 16
    '本帐号已使用流量 : %dT %dG %.3fM Bytes\n',               # 17
+   '发生错误，请稍候再试\n',
    )
 
 LZUNET_FIND_STRS = (
@@ -129,7 +130,10 @@ else:
 
 CONF = PROGRAM_PATH + os.sep + 'lzunet.ini'
 config = cp.RawConfigParser()
-
+if os.getenv('LNA_DEBUG'):
+    LZUNET_DEBUG = True
+else:
+    LZUNET_DEBUG = False
 SYS_ENCODING = locale.getdefaultlocale()[1]
 ispy2 = False
 if sys.version_info.major is 2:
@@ -204,7 +208,9 @@ def process_ret(ret):
     msg1 = ''
     if msg != [] and msga != []:
         msg1 = tfm(msg[0], msga[0])
-        if msg1 == TFMMSG['error_userpass']:
+        if type(msg1) != type(''):
+            msg1 = msg1.encode('gbk')
+        elif msg1 == TFMMSG['error_userpass']:
             return msg1
     flow = re.findall("flow='([\d.]+)\s*'", ret)
     time = re.findall("time='([\d.]+)\s*'", ret)
@@ -222,6 +228,20 @@ def process_ret(ret):
     else:
         time_flow = ''
     return msg1 + time_flow
+
+
+def lzunet_exc_handler():
+    exctype, value = sys.exc_info()[:2]
+    exception = traceback.format_exception_only(exctype, value)
+    # '10054':'Reset'
+    if '10054' in exception[0]:
+        sys.stdout.write(LZUNET_MSGS[9])
+    # '10060':'Timeout','10065':'Not Connected','11001':'getaddress failed'
+    if '10060' in exception[0] or '10065' in exception[0] or \
+            '11001' in exception[0]:
+        sys.stdout.write(LZUNET_MSGS[15])
+    if LZUNET_DEBUG:
+        sys.stdout.write(exception[0])
 
 
 def conn_auth(url, body, referer):
@@ -256,18 +276,9 @@ q=0.9,*/*;q=0.8'),
         # pass
         ret = urlrequest.urlopen(req).read()
     except:
-        exctype, value = sys.exc_info()[:2]
-        exception = traceback.format_exception_only(exctype, value)
-        print(exception[0])
-        # '10054':'Reset'
-        if '10054' in exception[0]:
-            sys.stdout.write(LZUNET_MSGS[9])
-        # '10060':'Timeout','10065':'Not Connected','11001':'getaddress failed'
-        if '10060' in exception[0] or '10065' in exception[0] or \
-                '11001' in exception[0]:
-            sys.stdout.write(LZUNET_MSGS[15])
+        lzunet_exc_handler()
         sys.exit(9)
-    if os.getenv('LNA_DEBUG'):
+    if LZUNET_DEBUG:
         sys.stdout.write(ret.encode(SYS_ENCODING))
     return ret
 
@@ -367,7 +378,7 @@ def login(userpass):
     config.read(CONF)
     url = config.get('AuthInfo', 'login_url')
     referer = config.get('AuthInfo', 'login_referer')
-    body = config.get('AuthInfo',' body1') + config.get('AuthInfo', 'body2',1)
+    body = config.get('AuthInfo', 'body1') + config.get('AuthInfo', 'body2',1)
     ret = conn_auth(url, body, referer).decode('gbk')
     if LZUNET_FIND_STRS[8] in ret:
         sys.stdout.write(TFMMSG[15])
@@ -388,10 +399,10 @@ def logout():
     ret = conn_auth(url, body, referer).decode('gbk')
     pr = process_ret(ret)
     sys.stdout.write(pr)
-    if LZUNET_FIND_STRS[10] in pr:
+    if 'OK' in pr:
         return 0
     else:
-        return 3
+        return 4
 
 
 def main():
@@ -428,9 +439,9 @@ if __name__ == '__main__':
     try:
         # main()
         pass
-    except Exception:  # as e:
-        # sys.stdout.write(LZUNET_MSGS[9])
-       sys.stdout.write(str(e))
+    except:
+        sys.stdout.write(LZUNET_MSGS[18])
+        lzunet_exc_handler()
 
 
 #vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
