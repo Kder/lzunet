@@ -128,8 +128,6 @@ else:
     PROGRAM_PATH = os.path.dirname(path0)
 #    PROGRAM_PATH = os.path.join(path0, os.pardir)
 
-CONF = PROGRAM_PATH + os.sep + 'lzunet.ini'
-config = cp.RawConfigParser()
 if os.getenv('LNA_DEBUG'):
     LZUNET_DEBUG = True
 else:
@@ -149,31 +147,32 @@ __doc__ = __doc__ % __version__
 
 
 def loadconf():
-    userpass, usertime = 8, 3146400
+    config_file = PROGRAM_PATH + os.sep + 'lzunet.ini'
+    config = cp.ConfigParser()
     try:
-        if config.read(CONF) != []:
-            userpass = (config.get('AuthInfo', 'userid'),
-                        config.get('AuthInfo', 'password'))
-            usertime = config.get('AuthInfo', 'usertime')
-        else:
-            createconf()
+        if config.read(config_file) == []:
+            createconf(config, config_file)
     except:
-        createconf()
-    return userpass, usertime
+        createconf(config, config_file)
+    return config, config_file
 
 
-def saveconf():
-    with open(CONF, 'w') as configfile:
+def saveconf(config, config_file):
+    with open(config_file, 'w') as configfile:
         config.write(configfile)
 
 
-def createconf():
+def createconf(config, config_file):
     config.add_section('AuthInfo')
-    config.set('AuthInfo', 'userid', 'test@lzu.cn')
-    config.set('AuthInfo', 'password', 'testpassword')
-    # config.add_section('AuthInfo')
-    config.set('AuthInfo', 'usertime', '3146400')
-    saveconf()
+    config.set('AuthInfo', 'userid', 'test')
+    config.set('AuthInfo', 'password', 'test')
+    config.set('AuthInfo', 'login_url', 'http://10.10.0.210/')
+    config.set('AuthInfo', 'login_referer', 'http://10.10.0.210/')
+    config.set('AuthInfo', 'logout_url', 'http://10.10.0.210/F.htm')
+    config.set('AuthInfo', 'logout_referer', 'http://10.10.0.210:9002/0')
+    config.set('AuthInfo', 'body1', 'DDDDD=%(userid)s&upass=%(password)s')
+    config.set('AuthInfo', 'body2', '&0MKKey=%B5%C7%C2%BC+Login&v6ip=')
+    saveconf(config, config_file)
 
 
 def getuserpass():
@@ -182,9 +181,10 @@ def getuserpass():
     passwd = input(LZUNET_MSGS[12])
     userpass = (userid, passwd)
     if '' not in userpass:
+        config, config_file = loadconf()
         config.set('AuthInfo', 'userid', userid)
         config.set('AuthInfo', 'password', passwd)
-        saveconf()
+        saveconf(config, config_file)
     return userpass
 
 
@@ -373,9 +373,8 @@ def get_ip():
         return [get_ip_lin('eth0')]
 
 
-def login(userpass):
-    config = cp.ConfigParser()
-    config.read(CONF)
+def login():
+    config = loadconf()[0]
     url = config.get('AuthInfo', 'login_url')
     referer = config.get('AuthInfo', 'login_referer')
     body = config.get('AuthInfo', 'body1') + config.get('AuthInfo', 'body2',1)
@@ -391,8 +390,7 @@ def login(userpass):
 
 
 def logout():
-    config = cp.ConfigParser()
-    config.read(CONF)
+    config = loadconf()[0]
     url = config.get('AuthInfo', 'logout_url')
     referer = config.get('AuthInfo', 'logout_referer')
     body = None
@@ -408,9 +406,10 @@ def logout():
 def main():
     userpass = None
     if len(sys.argv) == 1:
-        userpass = loadconf()[0]
-        if userpass is 8 or userpass[0] == 'test@lzu.cn':
-            userpass = getuserpass()
+        ret_code = login()
+        # userpass = loadconf()[0]
+        # if userpass is 8 or userpass[0] == 'test':
+            # userpass = getuserpass()
     elif len(sys.argv) == 3:
         userpass = (sys.argv[1], sys.argv[2])
     elif len(sys.argv) == 2:
@@ -424,10 +423,11 @@ def main():
     else:
         sys.stdout.write(__doc__)
         sys.exit(3)
-    if userpass:
-        ret_code = login(userpass)
+    # if userpass:
+        # ret_code = login(userpass)
     while (ret_code is 3) or (ret_code is 1):
-        ret_code = login(getuserpass())
+        getuserpass()
+        ret_code = login()
     return ret_code
 
 
