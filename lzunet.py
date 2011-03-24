@@ -134,7 +134,8 @@ else:
     LZUNET_DEBUG = False
 SYS_ENCODING = locale.getdefaultlocale()[1]
 ispy2 = False
-if sys.version_info.major is 2:
+if sys.version_info[0] is 2:
+#if sys.version_info.major is 2:
     ispy2 = True
     input = raw_input
     __doc__ = unicode(__doc__, 'utf-8').encode(SYS_ENCODING)
@@ -453,11 +454,9 @@ if __name__ == '__main__':
     ip = get_ip()[0]
     if ispy2:
         ip = unicode(ip, 'utf-8').encode(SYS_ENCODING)
-    main()
+#    main()
     try:
-        ret = main()
-        print(ret)
-        pass
+        main()
     except:
         sys.stdout.write(LZUNET_MSGS[18])
         lzunet_exc_handler()
