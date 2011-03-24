@@ -217,9 +217,19 @@ def process_ret(ret):
     if flow != [] and time != []:
         time = int(time[0])  # unit is minute
         flow = int(flow[0])  # unit is kbyte
-        days = time / 60 / 24
-        hours = time / 60 % 24
-        minutes = time % 60
+        
+        secs = time * 60
+        import datetime
+        dt0 = datetime.datetime.utcfromtimestamp(0)
+#        dt1 = datetime.datetime.utcnow()
+        dt1 = datetime.datetime.utcfromtimestamp(secs)
+        delta = dt1 - dt0
+#        days = time / 60 / 24
+#        hours = time / 60 % 24
+#        minutes = time % 60
+        days = delta.days
+        hours = datetime.datetime.utcfromtimestamp(delta.seconds).hour
+        minutes = datetime.datetime.utcfromtimestamp(delta.seconds).minute
         flow_tb = flow / 1073741824
         flow_gb = flow % 1073741824 / 1048576
         flow_mb = flow / 1024 % 1024 + flow % 1024 / 1024.0
@@ -267,6 +277,8 @@ q=0.9,*/*;q=0.8'),
     op.addheaders = headers
     urlrequest.install_opener(op)
     if body:
+        if not ispy2:
+            body = bytes(body, 'utf-8')
         req = urlrequest.Request(url, body)
     else:
         req = urlrequest.Request(url)
@@ -279,7 +291,10 @@ q=0.9,*/*;q=0.8'),
         lzunet_exc_handler()
         sys.exit(9)
     if LZUNET_DEBUG:
-        sys.stdout.write(ret.encode(SYS_ENCODING))
+        if ispy2:
+            sys.stdout.write(ret.encode(SYS_ENCODING))
+        else:
+            print(ret.decode(SYS_ENCODING))
     return ret
 
 
@@ -377,8 +392,11 @@ def login():
     config = loadconf()[0]
     url = config.get('AuthInfo', 'login_url')
     referer = config.get('AuthInfo', 'login_referer')
-    body = config.get('AuthInfo', 'body1') + config.get('AuthInfo', 'body2',1)
+    body = config.get('AuthInfo', 'body1') + config.get('AuthInfo', 'body2',
+        raw=True)
     ret = conn_auth(url, body, referer).decode('gbk')
+#    print(ret)
+#    sys.exit()
     if LZUNET_FIND_STRS[8] in ret:
         sys.stdout.write(TFMMSG[15])
         ret = conn_auth(url, None, referer).decode('gbk')
@@ -437,7 +455,8 @@ if __name__ == '__main__':
         ip = unicode(ip, 'utf-8').encode(SYS_ENCODING)
     main()
     try:
-        # main()
+        ret = main()
+        print(ret)
         pass
     except:
         sys.stdout.write(LZUNET_MSGS[18])
